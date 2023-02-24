@@ -2,7 +2,7 @@
 /*
 - boardDetail, boardList, comment.jsp 
 
-- 와글와글에서 
+- 커뮤니티에서 
 
 memberMoal.jsp
 > 게시글 목록 - 회원신고 (boardList.jsp)
@@ -71,7 +71,7 @@ document.getElementById('reportMemberBtn').addEventListener('click', () =>{
 
 
 
-// todo: 와글와글 게시글 신고  - 신고유형, 신고번호 매칭
+// todo: 커뮤니티 게시글 신고  - 신고유형, 신고번호 매칭
 // 관리자 게시글은 신고하기 버튼을 지움
 // 본인 게시글 : 신고 버튼 없음
 document.getElementById('reportBoardBtn').addEventListener('click', () => {

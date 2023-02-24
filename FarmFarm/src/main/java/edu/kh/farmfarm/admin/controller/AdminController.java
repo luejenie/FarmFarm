@@ -124,7 +124,7 @@ public class AdminController {
 	
 	
 	// 전체 회원 조회 (정렬, 페이지네이션, 검색)
-	@GetMapping("/admin/selectMemberList")
+	@GetMapping("/admin/memberList")
 	@ResponseBody
 	public String selectMember(@SessionAttribute(value="loginMember") Member loginMember, 
 								@RequestParam(value="cp", required=false, defaultValue="1") int cp,
@@ -162,7 +162,7 @@ public class AdminController {
 	
 	
 	// 회원 상세 조회
-	@GetMapping("/admin/selectMemberDetail")
+	@GetMapping("/admin/memberDetail")
 	@ResponseBody
 	public String selectMemberDetail(@SessionAttribute(value="loginMember") Member loginMember,
 										int hiddenNo) {

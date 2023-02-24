@@ -18,7 +18,7 @@ var memberSelectTable = document.getElementById("memberSelectTable");
 /** 전체 회원 정보 조회 함수 */
 const selectMemberList = (cp) => {
     $.ajax({
-        url: "/admin/selectMemberList",
+        url: "/admin/memberList",
         data: { "cp": cp, "authFilter": authFilter, "statFilter": statFilter, "keyword": keyword },
         dataType: "JSON",
         type: "GET",
@@ -40,7 +40,7 @@ const selectMemberList = (cp) => {
 */
 const selectMemberDetail = (hiddenNo) => {
     $.ajax({
-        url: "/admin/selectMemberDetail",
+        url: "/admin/memberDetail",
         data: { "hiddenNo": hiddenNo },
         dataType: "JSON",
         type: "GET",
@@ -787,7 +787,7 @@ const dropBtn2Text = document.getElementById("dropBtn2Text")
 // 판매자인증 필터 authFilter  ..  반복문 실패...
 // 0 전체, 1 미등록, 2 판매자, 3 인증대기
 // fix: 깔끔하게 수정하기!
-var dropBtn1TextArr = ['판매자 등록', '미등록', '판매자', '인증 대기', '인증 보류'];
+const dropBtn1TextArr = ['판매자 등록', '미등록', '판매자', '인증 대기', '인증 보류'];
 
 for(let i=0; i<dropBtn1TextArr.length; i++){
     document.getElementById("a" + i).addEventListener("click", () => {

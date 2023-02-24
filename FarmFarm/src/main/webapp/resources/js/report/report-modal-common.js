@@ -1,3 +1,4 @@
+// * 신고하기 js
 
 var reportContainer = document.getElementById("reportContainer");
 var reportBtn = document.getElementById("reportBtn");
@@ -12,8 +13,8 @@ var reportTargetNo;
 // 메서드 -----------------------------------------------
 
 
-// 신고 모달 열리는 함수 (기본 세팅)
-var openReportModal = () => {
+/** 신고 모달 열리는 함수 (기본 세팅) */
+const openReportModal = () => {
 
     // 신고 모달 열리기
     console.log("신고 모달");
@@ -27,9 +28,9 @@ var openReportModal = () => {
     reportContent.style.height = "60px";
 
     // 체크해제
-    for(let j=0; j<radioButton.length; j++) {
-        if(radioButton[j].checked){
-            radioButton[j].checked = false;
+    for(let i=0; i<radioButton.length; i++) {
+        if(radioButton[i].checked){
+            radioButton[i].checked = false;
         }
     }
 }
@@ -58,17 +59,17 @@ window.addEventListener('click', (e) => {
 
 
 
-// 신고하기 ajax
-var reportSubmitBtn = document.getElementById("reportSubmitBtn");
+// 신고하기 모달 안의 신고하기 버튼 클릭할 경우
+const reportSubmitBtn = document.getElementById("reportSubmitBtn");
 
 reportSubmitBtn.addEventListener("click", () => {
-    console.log("신고하기 버튼 클릭");
+    console.log("신고 버튼 클릭");
 
     // 선택한 신고 사유 가져오기
     const reportReasonList = document.getElementsByName('reportRadio');
     const radioText = document.getElementsByClassName('radio-text');
     
-    for(var i=0; i<reportReasonList.length; i++){
+    for(let i=0; i<reportReasonList.length; i++){
         if(reportReasonList[i].checked){
             //fixme: 왜,, 하나씩 밀리는 거지. 일단 임시방편으로 +1함.
             radioResult = radioText[i].innerText;
@@ -82,6 +83,7 @@ reportSubmitBtn.addEventListener("click", () => {
     console.log("reportReason : " + radioResult);
     console.log("reportContent : " + reportContent.value);
 
+    // 신고하기 실행
     report();
 })
 
@@ -91,7 +93,8 @@ reportSubmitBtn.addEventListener("click", () => {
 
 
 // optimize: 신고하기 ajax
-var report = () => {
+/** 신고하기 함수 */
+const report = () => {
     $.ajax({
         url: "/report",
         data: { "reportType" :reportType, 
