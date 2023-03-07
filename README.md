@@ -951,7 +951,8 @@ public class BannedAccountActivateScheduling {
 
 
 </br></br>
-
+	
+<!--
 ### 5.2. RESTFUL API로 변경하기
 - 기존에는 POST/GET mapping 두 가지만 사용함. <br>
 - 각 요청의 동작을 명확히 하는데 한계가 있음.
@@ -1013,7 +1014,7 @@ public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
 </details>
 
 
-
+-->
 
 
     
