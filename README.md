@@ -195,7 +195,7 @@ public class ReportController {
 	@Autowired
 	private ReportService service;
 
-	// 신고하기
+	// ajax 이용하여 신고하기
 	@PostMapping("/report")
 	@ResponseBody
 	public int insertReport(@SessionAttribute(value = "loginMember") Member loginMember,
@@ -251,7 +251,7 @@ public class ReportController {
 <br>
 	
 <details>
-<summary><b>4.2. ajax를 활용한 관리자페이지 기능 구현</b></summary>
+<summary><b>4.2. axios를 활용한 관리자페이지 기능 구현</b></summary>
 <div markdown="1">
 
 
@@ -468,7 +468,7 @@ AND DUPL_FLAG = 1 <!--reportTargetNo가 같을 때 신고 타입 'M'인 경우�
 <div markdown="1">
 
 ```javascript
-..
+
 /** 전체 회원 정보 조회 함수 */
 const selectMemberList = (cp) => {
     axios.get("/admin/member/list", {
