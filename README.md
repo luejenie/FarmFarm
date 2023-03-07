@@ -81,13 +81,18 @@
 	
 ![](https://user-images.githubusercontent.com/110653573/222202403-a3a38c67-fc1b-41f1-8853-d4f022a3f709.png)
 
-**총 6가지 신고** <br>
-
-(1) 페이지별 신고 대상이 하나인 경우 <br>
+#### 총 6가지 신고
+	
+### 1. 신고 대상 구분하기 (JS)
+	
+#### (1) 페이지별 신고 대상이 하나인 경우 <br>
   - 판매자(seller), 판매 게시글(post), 채팅 회원(chat) <br>
   - 주소의 pathname을 이용하여 조건 분리
-
- ```java
+<br>
+	
+▼ JS 코드
+	
+ ```javascript
  
 // pathname: 각 기능 메인 주소
 var pathname = location.pathname.substring(1, location.pathname.lastIndexOf("/"));
@@ -106,28 +111,37 @@ reportBtn.addEventListener("click", () => {
         messageModalOpen("관리자는 신고 대상이 아닙니다.");
 	
     } else{
-        openReportModal();  // 신고하기 모달
+        openReportModal();  // 신고하기 모달 열리고 → 신고 사유 등 선택한 뒤 신고버튼 누르면 report() 함수 선언
         switch(pathname){
             case 'seller': reportType = 'M'; reportTargetNo = targetNo; break;
             case 'post': reportType = 'P'; reportTargetNo = targetNo; break;
             case 'chat': reportType = 'M'; reportTargetNo = selectedChatNo; break; // chatContext.js에서 선언한 변수 사용
         }
-    
     }
 });
 
 ```
 <br>
 
-(2) 페이지별 신고 대상이 둘 이상인 경우 (각 대상의 식별 번호 이용)<br>
-  - 커뮤니티 게시글 작성자 신고, 게시글 신고, 댓글 신고
+#### (2) 페이지별 신고 대상이 둘 이상인 경우 (각 대상의 식별 번호 이용)<br>
+  - 커뮤니티 게시글 **작성자** 신고(회원 번호)<br>
+  - 커뮤니티 **게시글** 신고(게시글 번호)<br>
+  - 커뮤니티 **댓글** 신고(댓글 번호) <br>
+ 
+※ 페이지 안에 신고 대상이 여러 개이기 때문에 (1)의 방법처럼 pathname으로 신고 대상을 구분하기가 쉽지 않으므로 <br>
+   각 대상별로 조건을 나누어서 구현
 	
-```java
+
+<details>
+<summary>JS 코드</summary>
+<div markdown="1">
+
+```javascript
 
 // 1) 댓글 신고
 for(let i=0; i<reportCommentBtn.length; i++){
 
-    // 댓글의 신고하기 버튼 누르면
+    // 댓글의 신고하기 버튼 누르면 (본인의 댓글인 경우, 화면에서 신고하기 버튼 제거)
     reportCommentBtn[i]. addEventListener("click", () => {
 
 	// 신고 모달 열리기
@@ -179,7 +193,47 @@ document.getElementById('reportBoardBtn').addEventListener('click', () => {
 
 ```
 
+</div>
+</details>
+
+<br>
 	
+### 2. 신고하기 <br>
+	
+<details>
+<summary>신고 기능 JS</summary>
+<div markdown="1">
+
+```javascript
+// 신고하기 ajax
+var report = () => {
+    $.ajax({
+        url: "/report",
+        data: { "reportType" :reportType, 
+                "reportTargetNo" : reportTargetNo,
+                "reportReason" : radioResult,
+                "reportContent": reportContent.value},
+        type: "POST",
+        success: (result) => {
+            if(result > 0){
+                console.log("신고 접수");
+                reportContainer.style.display = 'none';
+                messageModalOpen('신고가 접수되었습니다.');
+            
+            } else {
+                console.log("신고 실패");
+            }
+        },
+        error: () => {
+            console.log("신고 오류");
+        }
+    });
+
+}
+```
+
+</div>
+</details>
 <details>
 <summary>Controller</summary>
 <div markdown="1">
@@ -223,7 +277,7 @@ public class ReportController {
 
 </div>
 </details>
-	
+
 <details>
 <summary>mapper</summary>
 <div markdown="1">
@@ -245,14 +299,12 @@ public class ReportController {
 <br>
 	
 <details>
-<summary><b>4.2. axios를 활용한 관리자페이지 기능 구현</b></summary>
+<summary><b>4.2. ajax/axios를 활용하여 비동기로 관리자 페이지 기능 구현</b></summary>
 <div markdown="1">
-
 
 ![](https://user-images.githubusercontent.com/110653573/222202930-e17bb192-4755-411b-ab83-674712b217ab.png)
 
-<br>
-<h4>(1) 필터, 검색 기능 구현</h4>
+#### (1) 필터, 검색 기능
 	
 <details>
 <summary>회원관리 Controller</summary>
@@ -454,11 +506,8 @@ AND DUPL_FLAG = 1 <!--reportTargetNo가 같을 때 신고 타입 'M'인 경우�
 </details>
 
 <br>
-
-[+]
-<br>
 <details>
-<summary>회원관리 JS</summary>
+<summary>회원관리 JS (axios)</summary>
 <div markdown="1">
 
 ```javascript
@@ -485,14 +534,23 @@ const selectMemberList = (cp) => {
 </div>
 </details>
 
-[회원 관리 JS 전체 코드](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/webapp/resources/js/admin/adminMember.js)	
+[▶ 회원 관리 JS 전체 코드](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/webapp/resources/js/admin/adminMember.js)	
 	
 <br>
+[+]
+<br>
 	
-<h4>(2) 회원 강제 탈퇴, 정지 / 게시글 삭제 등의 신고 처리 기능 구현</h4>
+[▶ 판매자 인증 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminSellerAuthController.java#L100) <br>
+[▶ 신고 내역 관리 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminReportController.java)
 
+<br>
+	
+#### (2) 대상별 신고 처리 기능
+  - 신고된 회원 **강제 탈퇴, 정지**
+  - 신고된 게시글, 댓글 **삭제**
+	
 <details>
-<summary>신고대상 처리 Controller</summary>
+<summary>신고 처리 Controller</summary>
 <div markdown="1">
 
 ```java
@@ -502,14 +560,6 @@ public class AdminProcessController {
 	@Autowired
 	private AdminProcessService service;
 	
-	// 회원 관리 - 강제 탈퇴 (신고 내역 없어도 가능)
-	@PutMapping("/admin/member/{memberNo}/kickout")
-	@ResponseBody
-	public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
-		return service.memberKickout(hiddenNo);
-	}
-	
-	
 	// 관리자페이지 - 신고 처리
 	/*
 	  계정 - 강제 탈퇴, 정지, 반려
@@ -517,6 +567,12 @@ public class AdminProcessController {
 	  admin-mapper 그대로 사용
 	 */
 	
+	// 회원 관리 - 강제 탈퇴 (신고 내역 없어도 가능)
+	@PutMapping("/admin/member/{memberNo}/kickout")
+	@ResponseBody
+	public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
+		return service.memberKickout(hiddenNo);
+	}
 	
 	// 신고 계정 - 강제탈퇴  // 신고된 회원 강제 탈퇴 + REPORT 테이블 변경하기 + 판매자면 판매상품 지우기
 	@PutMapping("/report/M/{memberNo}/kickout")
@@ -533,7 +589,6 @@ public class AdminProcessController {
 	public int reportMemberBanned(@PathVariable("memberNo") int hiddenNo) {
 		return service.reportMemberBanned(hiddenNo);
 	}
-	
 	
 	
 	
@@ -573,7 +628,7 @@ public class AdminProcessController {
 </details>
 	
 <details>
-<summary>신고 대상 처리 Service</summary>
+<summary>신고 처리 Service</summary>
 <div markdown="1">
 
 ```java
@@ -582,10 +637,6 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 	
 	@Autowired
 	private AdminProcessDAO dao;
-	
-	
-	//..(중략)..
-	
 	
 	// 회원 강제 탈퇴 (회원관리, 신고내역x)
 	@Override
@@ -672,23 +723,25 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 	}
 	
 	
-	//..(중략)..
+	// 정지된 계정 리스트 불러오기 (스케쥴링)
+	@Override
+	public List<Admin> selectBannedAccountList() {
+		return dao.selectBannedAccountList();
+	}
 	
+
+	// 정지된 계정 활성화 (스케쥴링)
+	@Override
+	public int activateAccount(int targetNo) {
+		return dao.activateAccount(targetNo);
+	}
 }
 ```
 
 </div>
 </details>
 	
-[신고 대상 처리 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminProcessDAO.java)
-	
-<br>
-[+]
-<br>
-	
-[판매자인증 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminSellerAuthController.java#L100) <br>
-[신고 조회 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminReportController.java)
-	
+[▶신고 대상 처리 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminProcessDAO.java)
 
 </div>
 </details>		
@@ -698,11 +751,15 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 <details>
 <summary><b>4.3. @Scheduled를 활용하여 정지 계정 자동 활성화</b></summary>
 <div markdown="1">
-	
+
 <br>
 	
+- 회원이 신고 당했을 경우, 계정이 7일 간 정지될 수 있음. <br>
+- @Scheduled를 활용하여, 계정이 정지된 일자가 정지된 일자의 7일을 넘었을 경우,<br>
+  자동으로 활성화되도록 함.
+	
 <details>
-<summary>스케줄링 </summary>
+<summary></summary>
 <div markdown="1">
 
 ```java
@@ -811,10 +868,10 @@ public class BannedAccountActivateScheduling {
 ![](https://user-images.githubusercontent.com/110653573/222223557-1e67c613-2ebd-4d30-b897-4e76a429af04.png)
 <br>
 
-[대시보드 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminController.java#L39-L71) <br>
-[대시보드 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminDAO.java#L35)
+[▶ 대시보드 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminController.java#L39-L71) <br>
+[▶ 대시보드 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminDAO.java#L35)
 <br>
-[대시보드 JS](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/webapp/resources/js/admin/dashboard.js)
+[▶ 대시보드 JS](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/webapp/resources/js/admin/dashboard.js)
 	
 </div>
 </details>	
