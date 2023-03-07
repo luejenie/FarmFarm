@@ -273,38 +273,28 @@ public class AdminController {
 	
 	//..(중략)..
 
-	// 전체 회원 조회 (정렬, 페이지네이션, 검색)
-	@GetMapping("/admin/memberList")
+	// 전체 회원 조회(정렬, 페이지네이션, 검색)
+	@GetMapping("/admin/member/list")
 	@ResponseBody
-	public String selectMember(@SessionAttribute(value="loginMember") Member loginMember, 
-				   @RequestParam(value="cp", required=false, defaultValue="1") int cp,
-				   @RequestParam(value="authFilter", required=false, defaultValue="0") String authFilter,
-				   @RequestParam(value="statFilter", required=false, defaultValue="0") String statFilter,
-				   @RequestParam(value="keyword", required=false) String keyword) {
-
+	public String selectMember(@RequestParam(value="cp", required=false, defaultValue="1") int cp,
+								@RequestParam(value="authFilter", required=false, defaultValue="0") String authFilter,
+								@RequestParam(value="statFilter", required=false, defaultValue="0") String statFilter,
+								@RequestParam(value="keyword", required=false) String keyword) {
+		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("authFilter", authFilter); // 판매자 인증 필터 정렬
-		paramMap.put("statFilter", statFilter); // 계정 상태 필터 
-
+		paramMap.put("authFilter", authFilter); // 판매자 인증 상태 필터
+		paramMap.put("statFilter", statFilter); // 계정 상태 필터
+		
 		if(keyword != null) {
-			paramMap.put("keyword", keyword);
+			paramMap.put("keyword", keyword); // 검색어
 		}
-
-		// 관리자인지 확인 (관리자면 result==1)
-		int result = service.checkAdmin();
-
+		
+		
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		if(result == 1 && loginMember != null) {
-
-			// 전체 회원 정보 조회 + 페이지네이션 + 정렬
-			map = service.selectMember(paramMap, cp);
-
-		} else {
-			System.out.println("관리자만 접근 가능합니다.");
-		}
-
-
+		// 전체 회원 정보 조회 + 페이지네이션 + 정렬
+		map = service.selectMember(paramMap, cp);
+	
 		return new Gson().toJson(map);
 	}
 	
@@ -382,7 +372,6 @@ public class AdminDAO {
 	 */
 	public List<Admin> selectMember(Map<String, Object> paramMap, Pagination pagination) {
 
-		// RowBounds 객체(마이바티스) : 여러 행 조회 결과 중 특정 위치부터 지정된 행의 개수만 조회하는 객체
 		int offset = (pagination.getCurrentPage() -1) * 15;
 		RowBounds rowBounds = new RowBounds(offset, 15);
 
@@ -461,7 +450,7 @@ AND DUPL_FLAG = 1 <!--reportTargetNo가 같을 때 신고 타입 'M'인 경우�
 </if>
 <if test='keyword != null'>
 	AND (LOWER(MEMBER_ID) LIKE LOWER('%${keyword}%')
-	OR 	LOWER(MEMBER_NICKNAME) LIKE LOWER('%${keyword}%')
+	OR LOWER(MEMBER_NICKNAME) LIKE LOWER('%${keyword}%')
 	OR MEMBER_NO LIKE ('%${keyword}%'))
 </if>
 </select>
@@ -474,7 +463,32 @@ AND DUPL_FLAG = 1 <!--reportTargetNo가 같을 때 신고 타입 'M'인 경우�
 
 [+]
 <br>
-[회원 관리 JS 코드](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/webapp/resources/js/admin/adminMember.js)	
+<details>
+<summary>회원관리 JS</summary>
+<div markdown="1">
+
+```javascript
+..
+/** 전체 회원 정보 조회 함수 */
+const selectMemberList = (cp) => {
+    axios.get("/admin/member/list", {
+        params: { "cp": cp, "authFilter": authFilter, "statFilter": statFilter, "keyword": keyword}
+    })
+    .then((response) => { // 성공
+        const map = response.data;
+        printMemberList(map.memberList, map.pagination);
+    }).catch(() => {
+        console.log("회원 정보 조회 실패");
+    });
+}
+
+//..(중략)..
+```
+
+</div>
+</details>
+
+[회원 관리 JS 전체 코드](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/webapp/resources/js/admin/adminMember.js)	
 	
 <br>
 	
