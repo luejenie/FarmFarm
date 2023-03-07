@@ -952,12 +952,51 @@ public class BannedAccountActivateScheduling {
 
 </br></br>
 
-### 5.2. 반복되는 코드 수정
-- 각각 조건에 차이가 있을 뿐, 반복되는 코드를 사용하는 코드를 수정
--
+### 5.2. RESTFUL API로 변경하기
+- 기존에는 POST/GET mapping 두 가지만 사용함. <br>
+- 각 요청의 동작을 명확히 하는데 한계가 있음.
 
-- axios로 변경 / restfulAPI로 변
-- 코드짧게 수
+</br>
+
+<details>
+<summary><b>기존 코드</b></summary>
+<div markdown="1">
+
+```java
+// 회원 관리 - 강제 탈퇴
+@PostMapping("/admin/kickout")
+@ResponseBody
+public int memberKickout(int hiddenNo) {
+	return service.memberKickout(hiddenNo);
+}
+```
+</div>
+</details>
+	
+</br>
+- 예를 들어, 회원을 강제 탈퇴시키는 코드의 경우,
+- 기존의 코드는 매핑 주소부터 강제 탈퇴되는 주체가 누구인지, 
+
+<details>
+<summary><b> 코드</b></summary>
+<div markdown="1">
+
+```java
+// 회원 관리 - 강제 탈퇴
+@PatchMapping("/admin/member/{memberNo}/kickout")
+@ResponseBody
+public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
+	return service.memberKickout(hiddenNo);
+}
+```
+
+</div>
+</details>
+
+	
+
+### 5.3. 반복되는 코드 수정
+  - 각각 조건에 차이가 있을 뿐, 반복되는 코드를 사용하는 코드를 수정
 
 
 </br>
@@ -976,8 +1015,6 @@ public class BannedAccountActivateScheduling {
 
 
 
-
-<!--## 6. 그 외 트러블 슈팅-->
 
     
 </br>
