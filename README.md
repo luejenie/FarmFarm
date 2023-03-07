@@ -216,9 +216,7 @@ public class ReportController {
 		int result = 0;
 		
 		if(loginMember != null) {
-
 			result = service.insertReport(map);
-			
 		}
 		
 		return result;
@@ -472,9 +470,12 @@ AND DUPL_FLAG = 1 <!--reportTargetNo가 같을 때 신고 타입 'M'인 경우�
 /** 전체 회원 정보 조회 함수 */
 const selectMemberList = (cp) => {
     axios.get("/admin/member/list", {
-        params: { "cp": cp, "authFilter": authFilter, "statFilter": statFilter, "keyword": keyword}
+        params: { "cp": cp, 
+		"authFilter": authFilter,
+		"statFilter": statFilter, 
+		"keyword": keyword}
     })
-    .then((response) => { // 성공
+    .then((response) => {
         const map = response.data;
         printMemberList(map.memberList, map.pagination);
     }).catch(() => {
@@ -493,9 +494,90 @@ const selectMemberList = (cp) => {
 <br>
 	
 <h4>(2) 회원 강제 탈퇴, 정지 / 게시글 삭제 등의 신고 처리 기능 구현</h4>
+
+<details>
+<summary>신고대상 처리 Controller</summary>
+<div markdown="1">
+
+```java
+@Controller
+public class AdminProcessController {
+	
+	@Autowired
+	private AdminProcessService service;
+	
+	// 회원 관리 - 강제 탈퇴 (신고 내역 없어도 가능)
+	@PutMapping("/admin/member/{memberNo}/kickout")
+	@ResponseBody
+	public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
+		return service.memberKickout(hiddenNo);
+	}
+	
+	
+	// 관리자페이지 - 신고 처리
+	/*
+	  계정 - 강제 탈퇴, 정지, 반려
+	  게시글 - 삭제, 반려
+	  admin-mapper 그대로 사용
+	 */
+	
+	
+	// 신고 계정 - 강제탈퇴  // 신고된 회원 강제 탈퇴 + REPORT 테이블 변경하기 + 판매자면 판매상품 지우기
+	@PutMapping("/report/M/{memberNo}/kickout")
+	@ResponseBody
+	public int reportMemberKickout(@PathVariable("memberNo") int hiddenNo, 
+					@RequestParam(value="authority", required=false, defaultValue="0") int authority) {
+		return service.reportMemberKickout(hiddenNo, authority);
+	}
+	
+	
+	// 신고 계정 - 정지   // 스케쥴러로 7일 뒤에 풀기
+	@PutMapping("/report/M/{memberNo}/suspension")
+	@ResponseBody
+	public int reportMemberBanned(@PathVariable("memberNo") int hiddenNo) {
+		return service.reportMemberBanned(hiddenNo);
+	}
+	
+	
+	
+	
+	// 신고 계정 - 반려
+	@PutMapping("/report/M/{memberNo}/hold")
+	@ResponseBody
+	public int reportMemberLeave(@PathVariable("memberNo") int hiddenNo) {
+		return service.reportMemberLeave(hiddenNo);
+	}
+	
+	
+	// 신고 게시글(판매글, 커뮤니티 게시글, 커뮤니티 댓글) - 삭제
+	@PutMapping("/report/{reportType}/{contentNo}/delete")
+	@ResponseBody
+	public int reportDeleteContent(@PathVariable("contentNo") int hiddenContentNo, 
+					@PathVariable("reportType") String reportType) {
+		return service.reportDeleteContent(hiddenContentNo, reportType);
+	}
+	
+
+	// 신고 게시글 - 반려
+	@PutMapping("/report/{reportType}/{contentNo}/hold")
+	@ResponseBody
+	public int reportLeaveContent(@PathVariable("contentNo") int hiddenContentNo, 
+				      @PathVariable("reportType") String reportType) {
+		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("hiddenContentNo", hiddenContentNo);
+		paramMap.put("reportType", reportType);
+			
+		return service.reportLeaveContent(paramMap);
+	}
+}
+```
+
+</div>
+</details>
 	
 <details>
-<summary>신고처리 Service</summary>
+<summary>신고 대상 처리 Service</summary>
 <div markdown="1">
 
 ```java
@@ -602,10 +684,7 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 </div>
 </details>
 	
-	
-[신고 처리 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminProcessController.java)
-<br>	
-[신고 처리 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminProcessDAO.java)
+[신고 대상 처리 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminProcessDAO.java)
 	
 <br>
 [+]
@@ -710,8 +789,6 @@ public class BannedAccountActivateScheduling {
 				if(result > 0) {
 					System.out.println("회원번호 " + targetNo + "의 계정이 활성화되었습니다.");
 					count = result;
-					
-					
 				} else {
 					System.out.println("계정 활성화 실패");
 				}
@@ -738,6 +815,7 @@ public class BannedAccountActivateScheduling {
 ![](https://user-images.githubusercontent.com/110653573/222223557-1e67c613-2ebd-4d30-b897-4e76a429af04.png)
 <br>
 
+[대시보드 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminController.java#L39-L71) <br>
 [대시보드 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminDAO.java#L35)
 <br>
 [대시보드 JS](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/webapp/resources/js/admin/dashboard.js)
@@ -823,8 +901,7 @@ public class BannedAccountActivateScheduling {
 ### 5.2.
 
 - Oracle Cloud FarmFarm 프로젝트 파일을 호스팅하는 도중 **예상치 못한 예외가 발생**함.
-- 로컬에서 서버를 돌렸을 경우에는 문제 없이 진행되었기 때문에 팀원 모두 원인을 찾지 못하는 상황에서
-- 원인은 Chart.js를 수행하기 위한 **SQL문의 WHERE절**인 것을 발견함.
+
 
 </br>
 
