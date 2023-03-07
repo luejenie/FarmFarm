@@ -292,6 +292,8 @@ public class ReportController {
 </div>
 </details>
 
+---	
+	
 </div>
 </details>	
 	
@@ -743,6 +745,8 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 	
 [▶신고 대상 처리 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminProcessDAO.java)
 
+---
+	
 </div>
 </details>		
 	
@@ -759,7 +763,7 @@ public class AdminProcessServiceImpl implements AdminProcessService{
   자동으로 활성화되도록 함.
 	
 <details>
-<summary></summary>
+<summary>코드</summary>
 <div markdown="1">
 
 ```java
@@ -855,7 +859,8 @@ public class BannedAccountActivateScheduling {
 </div>
 </details>
 	
-
+---
+	
 </div>
 </details>		
 
