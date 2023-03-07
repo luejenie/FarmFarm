@@ -73,10 +73,6 @@
 
 ## 4. 핵심 기능
 
-<details>
-<summary><b>핵심 기능 설명 펼치기</b></summary>
-<div markdown="1">
-
 <br>
 	
 <details>
@@ -706,7 +702,7 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 <br>
 	
 <details>
-<summary>Controller</summary>
+<summary>스케줄링 </summary>
 <div markdown="1">
 
 ```java
@@ -823,10 +819,6 @@ public class BannedAccountActivateScheduling {
 </div>
 </details>	
 	
-<!-- 핵심기능 접기 -->
-</div>
-</details>
-
 
 
 </br></br>
@@ -898,9 +890,12 @@ public class BannedAccountActivateScheduling {
 
 </br></br>
 
-### 5.2.
+### 5.2. 반복되는 코드 수정
+- 각각 조건에 차이가 있을 뿐, 반복되는 코드를 사용하는 코드를 수정
+-
 
-- Oracle Cloud FarmFarm 프로젝트 파일을 호스팅하는 도중 **예상치 못한 예외가 발생**함.
+- axios로 변경 / restfulAPI로 변
+- 코드짧게 수
 
 
 </br>
