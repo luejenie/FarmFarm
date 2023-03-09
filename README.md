@@ -542,7 +542,7 @@ const selectMemberList = (cp) => {
 [+]
 <br>
 	
-[▶ 판매자 인증 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminSellerAuthController.java#L100) <br>
+[▶ 판매자 인증 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminSellerAuthController.java#L59)<br>
 [▶ 신고 내역 관리 Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/AdminReportController.java)
 
 <br>
@@ -569,61 +569,63 @@ public class AdminProcessController {
 	  admin-mapper 그대로 사용
 	 */
 	
+	
 	// 회원 관리 - 강제 탈퇴 (신고 내역 없어도 가능)
-	@PutMapping("/admin/member/{memberNo}/kickout")
+	@PatchMapping("/admin/member/{memberNo}/kickout")
 	@ResponseBody
-	public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
-		return service.memberKickout(hiddenNo);
+	public int memberKickout(@PathVariable("memberNo") int memberNo) {
+		return service.memberKickout(memberNo);
 	}
 	
+	
 	// 신고 계정 - 강제탈퇴  // 신고된 회원 강제 탈퇴 + REPORT 테이블 변경하기 + 판매자면 판매상품 지우기
-	@PutMapping("/report/M/{memberNo}/kickout")
+	@PatchMapping("/report/M/{memberNo}/kickout")
 	@ResponseBody
-	public int reportMemberKickout(@PathVariable("memberNo") int hiddenNo, 
-					@RequestParam(value="authority", required=false, defaultValue="0") int authority) {
-		return service.reportMemberKickout(hiddenNo, authority);
+	public int reportMemberKickout(@PathVariable("memberNo") int memberNo, 
+									@RequestParam(value="authority", required=false, defaultValue="0") int authority) {
+		return service.reportMemberKickout(memberNo, authority);
 	}
 	
 	
 	// 신고 계정 - 정지   // 스케쥴러로 7일 뒤에 풀기
-	@PutMapping("/report/M/{memberNo}/suspension")
+	@PatchMapping("/report/M/{memberNo}/suspension")
 	@ResponseBody
-	public int reportMemberBanned(@PathVariable("memberNo") int hiddenNo) {
-		return service.reportMemberBanned(hiddenNo);
+	public int reportMemberBanned(@PathVariable("memberNo") int memberNo) {
+		return service.reportMemberBanned(memberNo);
 	}
 	
 	
-	
 	// 신고 계정 - 반려
-	@PutMapping("/report/M/{memberNo}/hold")
+	@PatchMapping("/report/M/{memberNo}/hold")
 	@ResponseBody
-	public int reportMemberLeave(@PathVariable("memberNo") int hiddenNo) {
-		return service.reportMemberLeave(hiddenNo);
+	public int reportMemberLeave(@PathVariable("memberNo") int memberNo) {
+		return service.reportMemberLeave(memberNo);
 	}
 	
 	
 	// 신고 게시글(판매글, 커뮤니티 게시글, 커뮤니티 댓글) - 삭제
-	@PutMapping("/report/{reportType}/{contentNo}/delete")
+	@PatchMapping("/report/{reportType}/{contentNo}/delete")
 	@ResponseBody
-	public int reportDeleteContent(@PathVariable("contentNo") int hiddenContentNo, 
-					@PathVariable("reportType") String reportType) {
-		return service.reportDeleteContent(hiddenContentNo, reportType);
+	public int reportDeleteContent(@PathVariable("contentNo") int contentNo, 
+									@PathVariable("reportType")	String reportType) {
+		return service.reportDeleteContent(contentNo, reportType);
 	}
 	
-
+	
 	// 신고 게시글 - 반려
-	@PutMapping("/report/{reportType}/{contentNo}/hold")
+	@PatchMapping("/report/{reportType}/{contentNo}/hold")
 	@ResponseBody
-	public int reportLeaveContent(@PathVariable("contentNo") int hiddenContentNo, 
-				      @PathVariable("reportType") String reportType) {
+	public int reportLeaveContent(@PathVariable("contentNo") int contentNo, 
+									@PathVariable("reportType")	String reportType) {
 		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("hiddenContentNo", hiddenContentNo);
+		paramMap.put("contentNo", contentNo);
 		paramMap.put("reportType", reportType);
 			
 		return service.reportLeaveContent(paramMap);
 	}
 }
+
 ```
 
 </div>
@@ -640,30 +642,39 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 	@Autowired
 	private AdminProcessDAO dao;
 	
+	
+	// 관리자 필터
+	// 관리자인지 확인
+	@Override
+	public int checkAdmin() {
+		return dao.checkAdmin();
+	}
+	
+	
 	// 회원 강제 탈퇴 (회원관리, 신고내역x)
 	@Override
-	public int memberKickout(int hiddenNo) {
-		return dao.memberKickout(hiddenNo);
+	public int memberKickout(int memberNo) {
+		return dao.memberKickout(memberNo);
 	}
 
 	
 	// 신고된 회원 강제 탈퇴 (신고내역 O)
 	@Override
-	public int reportMemberKickout(int hiddenNo, int authority) {
+	public int reportMemberKickout(int memberNo, int authority) {
 		
 		int result = 0;
 		
 		// 강제 탈퇴 시키고
-		result = dao.memberKickout(hiddenNo);
+		result = dao.memberKickout(memberNo);
 		
 		// 강제 탈퇴가 성공한다면
 		if(result > 0) {
 			// 신고 상태 변경, 신고 처리일자 추가
-			result = dao.changeReportStatus(hiddenNo);
+			result = dao.changeReportStatus(memberNo);
 			
-			// 판매자라면, 판매글 
+			// 판매자 강제 탈퇴 시, 판매글 삭제
 			if(authority == 1) {
-				result = dao.deletePostofSeller(hiddenNo);
+				result = dao.deletePostofSeller(memberNo);
 			}
 		}
 		
@@ -673,40 +684,40 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 	
 	// 신고된 회원 계정 정지
 	@Override
-	public int reportMemberBanned(int hiddenNo) {
-		return dao.reportMemberBanned(hiddenNo);
+	public int reportMemberBanned(int memberNo) {
+		return dao.reportMemberBanned(memberNo);
 	}
 	
 	
 	// 신고 계정 - 반려
 	@Override
-	public int reportMemberLeave(int hiddenNo) {
-		return dao.reportMemberLeave(hiddenNo);
+	public int reportMemberLeave(int memberNo) {
+		return dao.reportMemberLeave(memberNo);
 	}	
 	
 	
 	
 	// 신고 게시글 - 삭제
 	@Override
-	public int reportDeleteContent(int hiddenContentNo, String reportType) {
+	public int reportDeleteContent(int contentNo, String reportType) {
 		
 		int result = 0;
 		
 		// 커뮤니티 게시글 삭제
 		if(reportType.equals("B")) {
-			result = dao.reportDeleteBoard(hiddenContentNo);
+			result = dao.reportDeleteBoard(contentNo);
 		
 		// 판매글 삭제
 		} else if(reportType.equals("P")) {
-			result = dao.reportDeletePost(hiddenContentNo);
+			result = dao.reportDeletePost(contentNo);
 
 		// 댓글
 		} else if(reportType.equals("C")) {
-			result = dao.reportDeleteComment(hiddenContentNo);
+			result = dao.reportDeleteComment(contentNo);
 		}
 		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("hiddenContentNo", hiddenContentNo);
+		paramMap.put("contentNo", contentNo);
 		paramMap.put("reportType", reportType);
 		
 		// 삭제 후 신고 상태 변경, 처리 일자 추가
@@ -722,8 +733,10 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 	@Override
 	public int reportLeaveContent(Map<String, Object> paramMap) {
 		return dao.reportLeaveContent(paramMap);
-	}
+	}	
 	
+	
+	//-----------------------------------------------
 	
 	// 정지된 계정 리스트 불러오기 (스케쥴링)
 	@Override
@@ -887,11 +900,17 @@ public class BannedAccountActivateScheduling {
 
 ## 5. 트러블 슈팅
 
-### 5.1. Oracle Cloud 호스팅 중 예외 발생
+<br>
 
-- Oracle Cloud FarmFarm 프로젝트 파일을 호스팅하는 도중 **예상치 못한 예외가 발생**함.
+<details>
+<summary><b>5.1. Oracle Cloud 호스팅 중 예외 발생</b></summary>
+<div markdown="1">
+<!-- ### 5.1. Oracle Cloud 호스팅 중 예외 발생 -->
+<br>
+
+- Oracle Cloud FarmFarm 프로젝트 파일을 호스팅하는 도중 **예상치 못한 예외가 발생**하였다.
 - 로컬에서 서버를 돌렸을 경우에는 문제 없이 진행되었기 때문에 팀원 모두 원인을 찾지 못하는 상황에서
-- 원인은 Chart.js를 수행하기 위한 **SQL문의 WHERE절**인 것을 발견함.
+- 원인은 Chart.js를 수행하기 위한 **SQL문의 WHERE절**인 것을 발견하였다.
 
 </br>
 
@@ -924,9 +943,9 @@ public class BannedAccountActivateScheduling {
 
 </br>
 
-- 기존 코드의 WHERE절을 보면 **CHAR 타입 데이터와 DATE 타입 데이터를 형변환 없이 비교**하고 있다는 것을 알 수 있음..
-- 로컬 서버 환경에서는 타입이 다른 날짜 데이터의 비교가 가능했지만, Linux 환경에서 Oracle Cloud에 호스팅 된 페이지에서는 두 데이터의 **타입이 서로 달라 예외가 발생**함.
-- 단순히 타입을 수정하는 것에서 문제를 해결하지 않고, SQL문을 보기좋은 코드로 바꿀 수 있도록 고민하여 아래와 같이 코드를 개선할 수 있었음.
+- 기존 코드의 WHERE절을 보면 **CHAR 타입 데이터와 DATE 타입 데이터를 형변환 없이 비교**하고 있다는 것을 알 수 있다.
+- 로컬 서버 환경에서는 타입이 다른 날짜 데이터의 비교가 가능했지만, Linux 환경에서 Oracle Cloud에 호스팅 된 페이지에서는 두 데이터의 **타입이 서로 달라 예외가 발생**하였다.
+- 단순히 타입을 수정하는 것에서 문제를 해결하지 않고, SQL문을 보기좋은 코드로 바꿀 수 있도록 고민하여 아래와 같이 코드를 개선할 수 있었다.
 
 </br>
 
@@ -949,13 +968,20 @@ public class BannedAccountActivateScheduling {
 </div>
 </details>
 
+---
 
-</br></br>
+</div>
+</details>
+
+</br>
 	
-<!--
-### 5.2. RESTFUL API로 변경하기
-- 기존에는 POST/GET mapping 두 가지만 사용함. <br>
-- 각 요청의 동작을 명확히 하는데 한계가 있음.
+<details>
+<summary><b>5.2. RESTFUL API로 리팩토링 진행</b></summary>
+<div markdown="1">
+<br>
+
+- 기존에는 POST/GET mapping 두 가지만 사용하였다. <br>
+- 이러다보니 각 요청의 동작을 명확히 하는데 한계가 있었다.
 
 </br>
 
@@ -964,41 +990,56 @@ public class BannedAccountActivateScheduling {
 <div markdown="1">
 
 ```java
-// 회원 관리 - 강제 탈퇴
-@PostMapping("/admin/kickout")
+// 신고 계정 - 강제탈퇴
+@PostMapping("/report/kickout")
 @ResponseBody
-public int memberKickout(int hiddenNo) {
-	return service.memberKickout(hiddenNo);
+public int reportMemberKickout(int hiddenNo, int authority) {
+	return service.reportMemberKickout(hiddenNo, authority);
 }
 ```
+</div>
+</details>
+	
+<br>
+
+  - 예를 들어, 회원을 강제 탈퇴시키는 코드의 경우 <br> 기존의 코드는 강제 탈퇴되는 주체를 알아보기 힘들고 어떤 동작을 진행했는지 직관적으로 알아보기 어려웠다.
+  - 이에 매핑 주소에 reportNo를 사용하여 변경 대상을 알려 주고, PostMapping을 PatchMapping으로 바꾸어 일부 수정한다는 것을 알리도록 하였다.
+
+<br>
+
+<details>
+<summary><b>개선된 코드</b></summary>
+<div markdown="1">
+
+```java
+// 신고 계정 - 강제탈퇴
+@PatchMapping("/report/M/{memberNo}/kickout")
+@ResponseBody
+public int reportMemberKickout(@PathVariable("memberNo") int memberNo, 
+			      @RequestParam(value="authority", required=false, defaultValue="0") int authority) {
+	return service.reportMemberKickout(memberNo, authority);
+}
+```
+
+</div>
+</details>
+
+---
+
 </div>
 </details>
 	
 </br>
-- 예를 들어, 회원을 강제 탈퇴시키는 코드의 경우,
-- 기존의 코드는 매핑 주소부터 강제 탈퇴되는 주체가 누구인지, 
 
 <details>
-<summary><b> 코드</b></summary>
+<summary><b>5.3. 반복되는 코드 수정</b></summary>
 <div markdown="1">
 
-```java
-// 회원 관리 - 강제 탈퇴
-@PatchMapping("/admin/member/{memberNo}/kickout")
-@ResponseBody
-public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
-	return service.memberKickout(hiddenNo);
-}
-```
+<br> 
 
-</div>
-</details>
-
-	
-
-### 5.3. 반복되는 코드 수정
-  - 각각 조건에 차이가 있을 뿐, 반복되는 코드를 사용하는 코드를 수정
-
+  - 기존에는 조건에 차이가 있으면, if문으로 일일이 분리하여 작성하였다.
+  - 그러나 이와 같은 경우, 조건에만 차이가 존재하고 비슷한 코드가 반복되는 상황이 발생하였다.
+  - 아래 코드에서도 pathname이 무엇인지에 따라서 조금씩 차이가 있지만, 전반적으로 비슷한 구조가 반복되고 있다.
 
 </br>
 
@@ -1006,17 +1047,88 @@ public int memberKickout(@PathVariable("memberNo") int hiddenNo) {
 <summary><b>기존 코드</b></summary>
 <div markdown="1">
 
-~~~xml
- 
+~~~java
+ reportBtn.addEventListener("click", () => {
+   
+    // 판매자 신고
+    if(pathname == "seller") {
+        if(reportTargetNo == 0){
+            messageModalOpen("관리자는 신고 대상이 아닙니다.");
+        } else {
+            // 신고 모달 열리기
+            openReportModal();
+            reportType = "M";
+            reportTargetNo = targetNo;
+        }
+    }
+
+
+    // 채팅방 회원 신고(판매자, 일반회원 모두 신고 가능, authority로 구분)
+    if(pathname == "chat") {
+        if(reportTargetNo == 0){
+            messageModalOpen("관리자는 신고 대상이 아닙니다.");
+        } else {
+            // 신고 모달 열리기
+            openReportModal();
+            reportType = "M";
+            reportTargetNo = selectedChatNo;  //chatContext.js에서 선언한 변수
+        }
+    }
+
+
+    // 판매 게시글 신고 (사고팔고)
+    if(pathname == "post"){
+        if(reportTargetNo == 0){
+            messageModalOpen("관리자는 신고 대상이 아닙니다.");
+        } else {
+            // 신고 모달 열리기
+            openReportModal();
+            reportType = "P";
+            reportTargetNo = targetNo;  //postNo
+        }
+    }
+});
+
 ~~~
 
 </div>
 </details>
 
+</br>
 
--->
+  - switch문을 이용하여 if문의 조건을 하나로 묶고,
+  - pathname이 무엇인지에 따라 결과를 다르게 작성하여 정리하였다.
 
+<br>
 
+<details>
+<summary><b>개선된 코드</b></summary>
+<div markdown="1">
+
+```java
+
+ reportBtn.addEventListener("click", () => {
+
+    if(reportTargetNo == 0){
+        messageModalOpen("관리자는 신고 대상이 아닙니다.");
+    } else{
+        openReportModal();
+        switch(pathname){
+            case 'seller': reportType = 'M'; reportTargetNo = targetNo; break;
+            case 'post': reportType = 'P'; reportTargetNo = targetNo; break;
+            case 'chat': reportType = 'M'; reportTargetNo = selectedChatNo; break;
+        }
+    }
+ }
+      
+```
+
+</div>
+</details>
+
+</div>
+</details>
+	
     
 </br>
 
