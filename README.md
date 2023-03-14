@@ -322,13 +322,13 @@ public class AdminController {
 	//..(중략)..
 
 	// 전체 회원 조회(정렬, 페이지네이션, 검색)
-	@GetMapping("/admin/member/list")
+	@GetMapping("/admin/members/list")
 	@ResponseBody
 	public String selectMember(@RequestParam(value="cp", required=false, defaultValue="1") int cp,
-								@RequestParam(value="authFilter", required=false, defaultValue="0") String authFilter,
-								@RequestParam(value="statFilter", required=false, defaultValue="0") String statFilter,
-								@RequestParam(value="keyword", required=false) String keyword) {
-		
+				   @RequestParam(value="authFilter", required=false, defaultValue="0") String authFilter,
+				   @RequestParam(value="statFilter", required=false, defaultValue="0") String statFilter,
+				   @RequestParam(value="keyword", required=false) String keyword) {
+		  
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("authFilter", authFilter); // 판매자 인증 상태 필터
 		paramMap.put("statFilter", statFilter); // 계정 상태 필터
@@ -516,7 +516,7 @@ AND DUPL_FLAG = 1 <!--reportTargetNo가 같을 때 신고 타입 'M'인 경우�
 
 /** 전체 회원 정보 조회 함수 */
 const selectMemberList = (cp) => {
-    axios.get("/admin/member/list", {
+    axios.get("/admin/members/list", {
         params: { "cp": cp, 
 		"authFilter": authFilter,
 		"statFilter": statFilter, 
@@ -571,7 +571,7 @@ public class AdminProcessController {
 	
 	
 	// 회원 관리 - 강제 탈퇴 (신고 내역 없어도 가능)
-	@PatchMapping("/admin/member/{memberNo}/kickout")
+	@PatchMapping("/admin/members/{memberNo}/kickout")
 	@ResponseBody
 	public int memberKickout(@PathVariable("memberNo") int memberNo) {
 		return service.memberKickout(memberNo);
@@ -1032,14 +1032,14 @@ public int reportMemberKickout(@PathVariable("memberNo") int memberNo,
 </br>
 
 <details>
-<summary><b>5.3. 반복되는 코드 수정</b></summary>
+<summary><b>5.3. 반복되는 코드 개선</b></summary>
 <div markdown="1">
 
 <br> 
 
   - 기존에는 조건에 차이가 있으면, if문으로 일일이 분리하여 작성하였다.
   - 그러나 이와 같은 경우, 조건에만 차이가 존재하고 비슷한 코드가 반복되는 상황이 발생하였다.
-  - 아래 코드에서도 pathname이 무엇인지에 따라서 조금씩 차이가 있지만, 전반적으로 비슷한 구조가 반복되고 있다.
+  - 아래 코드에서도 주소창에서 가져온 pathname이 무엇인지에 따라서 조금씩 차이가 있지만, 전반적으로 비슷한 구조가 반복되고 있다.
 
 </br>
 
@@ -1096,8 +1096,10 @@ public int reportMemberKickout(@PathVariable("memberNo") int memberNo,
 
 </br>
 
-  - switch문을 이용하여 if문의 조건을 하나로 묶고,
-  - pathname이 무엇인지에 따라 결과를 다르게 작성하여 정리하였다.
+  - 공통된 구문을 하나로 묶는 것이 효율적이라는 생각이 들었다.
+  - messageModalOpen()함수와 openReportModal() 함수가 작동하는 조건을 동일하기 때문에
+  - 먼저 두 함수가 작동되는 조건을 하나로 묶고
+  - 세부 조건을 switch문을 이용하여 pathname에 따라 결과를 다르게 하였다.
 
 <br>
 
