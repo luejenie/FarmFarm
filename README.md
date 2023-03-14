@@ -296,7 +296,7 @@ public class ReportController {
 	
 </div>
 </details>	
-	
+
 
 <br>
 	
@@ -304,7 +304,11 @@ public class ReportController {
 <summary><b>4.2. ajax/axios를 활용하여 비동기로 관리자 페이지 기능 구현</b></summary>
 <div markdown="1">
 
-![](https://user-images.githubusercontent.com/110653573/222202930-e17bb192-4755-411b-ab83-674712b217ab.png)
+	
+![](https://user-images.githubusercontent.com/110653573/224872423-32f98f57-d9a5-4c5f-addb-862610668cef.png)
+<br>
+![](https://user-images.githubusercontent.com/110653573/224874503-dc610f0f-8a04-498a-bcf8-25f4b2eab51c.png)
+
 
 #### (1) 필터, 검색 기능
 	
