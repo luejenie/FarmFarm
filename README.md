@@ -912,9 +912,10 @@ public class BannedAccountActivateScheduling {
 <!-- ### 5.1. Oracle Cloud 호스팅 중 예외 발생 -->
 <br>
 
-- Oracle Cloud FarmFarm 프로젝트 파일을 호스팅하는 도중 **예상치 못한 예외가 발생**하였다.
+- Oracle Cloud FarmFarm 프로젝트 파일을 호스팅하는 도중 
+- 관리자페이지 대시보드의 그래프가 나오지 않은 상황이 발생하였다.
 - 로컬에서 서버를 돌렸을 경우에는 문제 없이 진행되었기 때문에 팀원 모두 원인을 찾지 못하는 상황에서
-- 원인은 Chart.js를 수행하기 위한 **SQL문의 WHERE절**인 것을 발견하였다.
+- 원인은 Chart.js를 사용하여 구현한 가입, 주문 수의 **SQL문의 WHERE절**인 것을 발견하였다.
 
 </br>
 
@@ -948,8 +949,8 @@ public class BannedAccountActivateScheduling {
 </br>
 
 - 기존 코드의 WHERE절을 보면 **CHAR 타입 데이터와 DATE 타입 데이터를 형변환 없이 비교**하고 있다는 것을 알 수 있다.
-- 로컬 서버 환경에서는 타입이 다른 날짜 데이터의 비교가 가능했지만, Linux 환경에서 Oracle Cloud에 호스팅 된 페이지에서는 두 데이터의 **타입이 서로 달라 예외가 발생**하였다.
-- 단순히 타입을 수정하는 것에서 문제를 해결하지 않고, SQL문을 보기좋은 코드로 바꿀 수 있도록 고민하여 아래와 같이 코드를 개선할 수 있었다.
+- 로컬 서버 환경에서는 타입이 다른 날짜 데이터의 비교가 가능했지만, Linux 환경에서 Oracle Cloud에 호스팅 된 페이지에서는 두 데이터의 타입이 달라 비교가 어려웠다.
+- 타입을 수정하는 것으로 문제를 해결하지 않고, 팀원들과 같이 고민하여 아래와 같이 SQL문을 개선할 수 있었다.
 
 </br>
 
@@ -994,11 +995,11 @@ public class BannedAccountActivateScheduling {
 <div markdown="1">
 
 ```java
-// 신고 계정 - 강제탈퇴
-@PostMapping("/report/kickout")
+// 신고 게시글(판매글, 커뮤니티 게시글, 커뮤니티 댓글) - 삭제
+@GetMapping("/report/deleteContent")
 @ResponseBody
-public int reportMemberKickout(int hiddenNo, int authority) {
-	return service.reportMemberKickout(hiddenNo, authority);
+public int reportDeleteContent(int hiddenContentNo, String reportType) {
+	return service.reportDeleteContent(hiddenContentNo, reportType);
 }
 ```
 </div>
@@ -1006,8 +1007,9 @@ public int reportMemberKickout(int hiddenNo, int authority) {
 	
 <br>
 
-  - 예를 들어, 회원을 강제 탈퇴시키는 코드의 경우 <br> 기존의 코드는 강제 탈퇴되는 주체를 알아보기 힘들고 어떤 동작을 진행했는지 직관적으로 알아보기 어려웠다.
-  - 이에 매핑 주소에 reportNo를 사용하여 변경 대상을 알려 주고, PostMapping을 PatchMapping으로 바꾸어 일부 수정한다는 것을 알리도록 하였다.
+  - 예를 들어, 게시글, 댓글 등을 삭제하는 코드의 경우 <br> 기존의 코드는 삭제되는 주체를 알아보기 힘들고 어떤 동작을 진행했는지 직관적으로 알아보기 어려웠다.
+  - 이에 매핑 주소에 신고 대상의 타입(reportType)과 신고 대상의 식별 번호(contentNo)을 받아와 알려 주고, 
+  - PostMapping을 PatchMapping으로 바꾸어 일부 수정한다는 것을 알리도록 하였다.
 
 <br>
 
@@ -1016,12 +1018,12 @@ public int reportMemberKickout(int hiddenNo, int authority) {
 <div markdown="1">
 
 ```java
-// 신고 계정 - 강제탈퇴
-@PatchMapping("/report/M/{memberNo}/kickout")
+// 신고 게시글(판매글, 커뮤니티 게시글, 커뮤니티 댓글) - 삭제
+@PatchMapping("/report/{reportType}/{contentNo}/delete")
 @ResponseBody
-public int reportMemberKickout(@PathVariable("memberNo") int memberNo, 
-			      @RequestParam(value="authority", required=false, defaultValue="0") int authority) {
-	return service.reportMemberKickout(memberNo, authority);
+public int reportDeleteContent(@PathVariable("contentNo") int contentNo, 
+			       @PathVariable("reportType") String reportType) {
+	return service.reportDeleteContent(contentNo, reportType);
 }
 ```
 
@@ -1043,7 +1045,6 @@ public int reportMemberKickout(@PathVariable("memberNo") int memberNo,
 
   - 기존에는 조건에 차이가 있으면, if문으로 일일이 분리하여 작성하였다.
   - 그러나 이와 같은 경우, 조건에만 차이가 존재하고 비슷한 코드가 반복되는 상황이 발생하였다.
-  - 아래 코드에서도 주소창에서 가져온 pathname이 무엇인지에 따라서 조금씩 차이가 있지만, 전반적으로 비슷한 구조가 반복되고 있다.
 
 </br>
 
@@ -1101,7 +1102,7 @@ public int reportMemberKickout(@PathVariable("memberNo") int memberNo,
 </br>
 
   - 공통된 구문을 하나로 묶는 것이 효율적이라는 생각이 들었다.
-  - messageModalOpen()함수와 openReportModal() 함수가 작동하는 조건을 동일하기 때문에
+  - messageModalOpen()함수와 openReportModal() 함수가 작동되는 조건이 동일하기 때문에
   - 먼저 두 함수가 작동되는 조건을 하나로 묶고
   - 세부 조건을 switch문을 이용하여 pathname에 따라 결과를 다르게 하였다.
 
