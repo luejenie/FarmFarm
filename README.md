@@ -11,6 +11,37 @@
 
 <br>
 
+
+## 0. 기획의도
+
+<br>
+
+최근 귀농, 숲세권 등의 단어에서 보여지듯이 바쁜 현대 사회에서 벗어나 자연과 가까워지고 싶은 욕구가 증가하고 있다. <br>
+작게는 집 베란다 화분에서부터 나아가서는 주말농장, 텃밭 등 *자연을 찾는 수요* 또한 늘어나고 있다. <br>
+이뿐만 아니라 팬데믹으로 인해 건강에 관한 관심이 증가하면서 바른 먹거리와 깨끗한 농산물을 찾는 사람들이 많아졌고, <br>
+건강한 먹거리를 살 수 있는 **소비자**와 건강한 먹거리를 팔 수 있는 **생산자 모두를 위한 사이트**의 필요성을 자각하게 되었다. <br>
+
+<br>
+
+**FarmFarm(팜팜)** 은 이러한 수요와 생산을 접목하면서 시작되었다. <br>
+건강한 먹거리를 사고파는 플랫폼에서 멈추지 않고, 먹거리를 직접 기르는 사람들에게까지도 도움이 될 수 있는 플램폼! <br>
+
+<br>
+
+팜팜은, <br>
+**_소비자_** 로서 건강한 먹거리를 구매하고, <br>
+**_판매자_** 로서 직접 기른 농작물을 직접 판매하고, <br>
+**_생산자_** 로서 농사에 필요한 농자재 구매 및 정보를 공유하는 <br>
+All in One **거래 중개 플랫폼**을 추구한다.
+
+<br>
+
+💡**BenchMarking**💡<br>
+농직, 마켓컬리, 당근마켓, 쿠팡 등
+
+<br>
+<br>
+
 ## 1. 프로젝트 소개
 - **제작 기간** : 2022년 12월 12일 ~ 2023년 1월 11일
 - **참여 인원** : 6인 팀 프로젝트
@@ -87,7 +118,7 @@
 	
 #### (1) 페이지별 신고 대상이 하나인 경우 <br>
   - 판매자(seller), 판매 게시글(post), 채팅 회원(chat) <br>
-  - 주소의 pathname을 이용하여 조건 분리
+  - 주소의 pathname을 이용하여 조건을 분리하였다.
 <br>
 	
 ▼ JS 코드
@@ -128,8 +159,8 @@ reportBtn.addEventListener("click", () => {
   - 커뮤니티 **게시글** 신고(게시글 번호)<br>
   - 커뮤니티 **댓글** 신고(댓글 번호) <br>
  
-※ 페이지 안에 신고 대상이 여러 개이기 때문에 (1)의 방법처럼 pathname으로 신고 대상을 구분하기가 쉽지 않으므로 <br>
-   각 대상별로 조건을 나누어서 구현
+※ 페이지 안에 신고 대상이 여러 개이기 때문에 (1)의 방법처럼 pathname으로 신고 대상을 구분하기가 쉽지 않았다. <br>
+   이에 각 대상별로 조건을 나누어서 구현하는 방법을 택하였다.
 	
 
 <details>
@@ -200,6 +231,11 @@ document.getElementById('reportBoardBtn').addEventListener('click', () => {
 	
 ### 2. 신고하기 <br>
 	
+  - 신고하기를 클릭하면, 신고 사유를 입력하는 모달창이 열리게 되고 
+  - 이 모달창에서 신고하기를 누르면 신고 사유와 함께 신고 기능이 처리된다.
+  - <p>신고 대상의 번호(reportTargetNo), 계정/게시글 등 신고 대상의 타입(reportType), 신고자가 선택한 신고 사유(reportReason) 및 <br>
+    작성한 신고 사유(reportContent)를 담아 컨트롤러에 전달하였고, 이를 신고 테이블에 insert 하였다.</p>
+
 <details>
 <summary>신고 기능 JS</summary>
 <div markdown="1">
@@ -311,7 +347,14 @@ public class ReportController {
 
 
 #### (1) 필터, 검색 기능
-	
+
+  - 필터의 경우, 필터 별로 고유한 아이디를 주어 선택될 때마다 아이디의 값을 컨트롤러로 전달하였고,
+  - 검색의 경우, 검색어가 입력될 때마다 검색어를 컨트롤러로 전달하였다.
+  - 필터 아이디의 값과 검색어는 mapper에서 if문을  경우의 수를 구분하여 적용하였다.
+  - 각각의 결과는 비동기를 이용하여 새로 목록에 조회되도록 하였다.
+  
+<br>
+
 <details>
 <summary>회원관리 Controller</summary>
 <div markdown="1">
@@ -552,8 +595,13 @@ const selectMemberList = (cp) => {
 <br>
 	
 #### (2) 대상별 신고 처리 기능
-  - 신고된 회원 **강제 탈퇴, 정지**
-  - 신고된 게시글, 댓글 **삭제**
+  - 신고된 회원 **강제 탈퇴, 정지, 반려**
+  - 신고된 게시글, 댓글 **삭제, 반려**
+  - <p>각 대상별로 다르게 처리되어야 했으므로 각각 기능을 다르게 만들었다.<br>
+    특히 판매자의 경우, 신고된 상태를 변경하는 것에서 그치지 않고<br>
+    판매자가 쓴 판매글까지 같이 삭제되어야 했기 때문에 한 번 더 처리를 해주었다.</p>
+
+<br>
 	
 <details>
 <summary>신고 처리 Controller</summary>
@@ -586,7 +634,7 @@ public class AdminProcessController {
 	@PatchMapping("/report/M/{memberNo}/kickout")
 	@ResponseBody
 	public int reportMemberKickout(@PathVariable("memberNo") int memberNo, 
-									@RequestParam(value="authority", required=false, defaultValue="0") int authority) {
+					@RequestParam(value="authority", required=false, defaultValue="0") int authority) {
 		return service.reportMemberKickout(memberNo, authority);
 	}
 	
@@ -611,7 +659,7 @@ public class AdminProcessController {
 	@PatchMapping("/report/{reportType}/{contentNo}/delete")
 	@ResponseBody
 	public int reportDeleteContent(@PathVariable("contentNo") int contentNo, 
-									@PathVariable("reportType")	String reportType) {
+					@PathVariable("reportType") String reportType) {
 		return service.reportDeleteContent(contentNo, reportType);
 	}
 	
@@ -620,7 +668,7 @@ public class AdminProcessController {
 	@PatchMapping("/report/{reportType}/{contentNo}/hold")
 	@ResponseBody
 	public int reportLeaveContent(@PathVariable("contentNo") int contentNo, 
-									@PathVariable("reportType")	String reportType) {
+				      @PathVariable("reportType") String reportType) {
 		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("contentNo", contentNo);
@@ -760,7 +808,12 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 </div>
 </details>
 	
-[▶신고 대상 처리 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminProcessDAO.java)
+<br>
+
+[▶신고 대상 처리 DAO](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/model/dao/AdminProcessDAO.java) <br>
+[▶신고 대상 처리 mapper](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/resources/mappers/adminReport-mapper.xml#L368-L468)
+
+<br>
 
 ---
 	
@@ -775,106 +828,13 @@ public class AdminProcessServiceImpl implements AdminProcessService{
 
 <br>
 	
-- 회원이 신고 당했을 경우, 계정이 7일 간 정지될 수 있음. <br>
+- 회원이 신고 당했을 경우, 계정을 7일 간 정지 처리할 수 있다. <br>
 - @Scheduled를 활용하여, 계정이 정지된 일자가 정지된 일자의 7일을 넘었을 경우,<br>
-  자동으로 활성화되도록 함.
+  자동으로 활성화되도록 하였다.
+ <br>
+ 
+  [▶ Controller](https://github.com/luejenie/FarmFarm/blob/main/FarmFarm/src/main/java/edu/kh/farmfarm/admin/controller/BannedAccountActivateScheduling.java)
 	
-<details>
-<summary>코드</summary>
-<div markdown="1">
-
-```java
-@Component
-public class BannedAccountActivateScheduling {
-
-	@Autowired
-	private AdminProcessService service;
-	
-	int count = 0;
-	
-	// 신고되어 정지된 계정 7일 뒤에 풀기
-	@Scheduled(cron = "0 * * * * *")  // 매 분 0초에 실행
-	public void bannedAccountActivate() throws ParseException{
-		
-		System.out.println("[ADMIN] 정지 계정 해제 프로세스 진행합니다.");
-		
-		// 1. 정지된 계정 조회하기
-		List<Admin> bannedAccountList = service.selectBannedAccountList();
-		
-		
-		// 2. processDate의 일시 +7 이 현재시간을 지났는지 확인!
-		for(Admin admin : bannedAccountList) {
-			
-			String processDate = admin.getProcessDate();
-			
-			//System.out.println(processDate); //2023-01-04 17:05:08
-
-			
-			// 1) 7일 뒤 날짜, 시간 구하기
-	
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			
-			// 날짜 연산을 위해 String을 Date 객체로 변경
-			Date pDate = sdf.parse(processDate);
-			
-			// 날짜 연산을 위한 Calendar 객체 생성 후 date 대입
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(pDate);
-			
-			//System.out.println(cal.getTime()); // Wed Jan 04 17:05:08 KST 2023
-			
-	
-			// 7일 더하기
-			cal.add(Calendar.DATE, 7);
-			
-			
-			// processDate에서 7일 더한 날짜 (sdf 포맷으로 변경)
-			String afterDate = sdf.format(cal.getTime());
-			
-			
-			
-			// 2) 현재 날짜, 시간
-			LocalDateTime now = LocalDateTime.now();
-			
-			// 포맷 변경
-			String sysdate = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-			
-			
-			// 3. 7일 뒤 날짜가 현재 시간을 지났으면! 해당 reportTargetNo 조회
-			int result = afterDate.compareTo(sysdate);  
-			// compareTo() 
-			// result = 0 동일 시간
-			// result < 0 afterDate는 sysdate 이전 날짜
-			// result > 0 afterDate는 sysdate 이후 날짜
-			
-			
-			if(result < 0) {
-			
-				int targetNo = admin.getReportTargetNo();
-				String targetType = admin.getReportType();
-				
-				System.out.println(targetNo);
-				
-				// 4. 해당 계정 활성화
-				if(targetType.equals("M")) {
-					result = service.activateAccount(targetNo);
-				}
-				
-				if(result > 0) {
-					System.out.println("회원번호 " + targetNo + "의 계정이 활성화되었습니다.");
-					count = result;
-				} else {
-					System.out.println("계정 활성화 실패");
-				}
-			}
-		}
-	}
-}
-	
-```
-
-</div>
-</details>
 	
 ---
 	
