@@ -26,7 +26,7 @@ public class AdminProcessDAO {
 	
 	
 	/** 회원 강제 탈퇴
-	 * @param inputMemberId
+	 * @param memberNo
 	 * @return result
 	 */
 	public int memberKickout(int memberNo) {
@@ -35,7 +35,7 @@ public class AdminProcessDAO {
 
 
 	/** 신고 상태 변경, 신고 일자 업데이트 (계정)
-	 * @param hiddenNo
+	 * @param memberNo
 	 * @return result
 	 */
 	public int changeReportStatus(int memberNo) {
@@ -45,7 +45,7 @@ public class AdminProcessDAO {
 	
 	
 	/** 강제 탈퇴된 판매자의 판매글 삭제
-	 * @param hiddenNo
+	 * @param memberNo
 	 * @return result
 	 */
 	public int deletePostofSeller(int memberNo) {
@@ -55,7 +55,7 @@ public class AdminProcessDAO {
 
 
 	/** 신고 회원 계정 정지
-	 * @param hiddenNo
+	 * @param memberNo
 	 * @return result
 	 */
 	public int reportMemberBanned(int memberNo) {
@@ -66,7 +66,7 @@ public class AdminProcessDAO {
 
 	
 	/** 신고 회원 반려
-	 * @param hiddenNo
+	 * @param memberNo
 	 * @return result
 	 */
 	public int reportMemberLeave(int memberNo) {
@@ -76,7 +76,7 @@ public class AdminProcessDAO {
 
 	
 	/** 신고 커뮤니티게시글 삭제
-	 * @param hiddenContentNo
+	 * @param contentNo
 	 * @return result
 	 */
 	public int reportDeleteBoard(int contentNo) {
@@ -85,7 +85,7 @@ public class AdminProcessDAO {
 
 
 	/** 신고 판매글 삭제
-	 * @param hiddenContentNo
+	 * @param contentNo
 	 * @return result
 	 */
 	public int reportDeletePost(int contentNo) {
@@ -95,7 +95,7 @@ public class AdminProcessDAO {
 	
 
 	/** 신고 댓글 삭제
-	 * @param hiddenContentNo
+	 * @param contentNo
 	 * @return result
 	 */
 	public int reportDeleteComment(int contentNo) {
