@@ -3,7 +3,6 @@
 
 <c:set var="boardList" value="${boardMap.boardList}"/>
 <c:set var="pagination" value="${boardMap.pagination}"/>
-<%-- <c:set var="pagination" value="${boardMap.pagination}"/> --%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -29,12 +28,6 @@
         <c:if test="${not empty param.key || not empty param.sort}">
             <c:set var="sURL" value="&key=${param.key}&query=${param.query}&sort=${param.sort}"/>
         </c:if>
-        <%-- <c:if test="${not empty param.query}">
-            <c:set var="sURL" value="&query=${param.query}"/>
-        </c:if> --%>
-        <%-- <c:if test="${not empty param.sort}">
-            <c:set var="soURL" value="&sort=${param.sort}"/>
-        </c:if> --%>
 
     <main>
         <section class="board-top">
@@ -42,12 +35,12 @@
         </section>
         <section class="board-nav">
             <div class="board-nav-area">
-                <a id="type1" href="/board/${1}">자유게시판</a>
-                <a id="type2" href="/board/${2}">팁</a>
-                <a id="type3" href="/board/${3}">질문</a>
+                <a id="type1" href="/boards/${1}">자유게시판</a>
+                <a id="type2" href="/boards/${2}">팁</a>
+                <a id="type3" href="/boards/${3}">질문</a>
             </div>
         </section>
-        <form action="/board/${boardTypeNo}" class="board-search">
+        <form action="/boards/${boardTypeNo}" class="board-search">
             <section class="board-search-area">
                 <select name="key" id="search-key">
                     <option value="t">제목</option>
@@ -79,7 +72,6 @@
             <div class="board-list-top">
                 <div class="board-List-title">
                     <span class="board-no">No.</span>
-                    <%-- <span class="board-img"></span> --%>
                     <span class="board-title">게시글 제목</span>
                     <span class="board-writer">작성자</span>
                     <span class="board-date">작성일</span>
@@ -98,15 +90,9 @@
                             <c:forEach var="board" items="${boardList}">
                                 <li>
                                     <span class="board-no">${board.boardNo}</span>
-                                    <%-- <c:if test="${!empty board.thumbnail}">
-                                        <span class="board-img"><img src="${board.thumbnail}" class="thumbImg"></span>
-                                    </c:if>
-                                    <c:if test="${empty board.thumbnail}">
-                                        <span class="board-img"></span>
-                                    </c:if> --%>
                                     <span class="board-title">
                                         <c:if test="${loginMember.authority != 1}">
-                                            <a href="/board/${boardTypeNo}/${board.boardNo}?cp=${pagination.currentPage}${sURL}" class="goBoard">
+                                            <a href="/boards/${boardTypeNo}/${board.boardNo}?cp=${pagination.currentPage}${sURL}" class="goBoard">
                                                 ${board.boardTitle}&nbsp;(${board.commentCount})</a>
                                         </c:if>
                                         <c:if test="${loginMember.authority == 1}"><a class="goBoard">${board.boardTitle}&nbsp;(${board.commentCount})</a></c:if>
@@ -160,7 +146,7 @@
                     </ul>
 
                     <c:if test="${!empty loginMember && loginMember.authority != 1}">
-                        <a href="/board/write/${boardTypeNo}" class="board-write">글쓰기</a>
+                        <a href="/boards/${boardTypeNo}/writing" class="board-write">글쓰기</a>
                     </c:if>
                 </div>
             </div>
@@ -173,7 +159,6 @@
 
     <%-- 로그인 모달창 --%>
     <jsp:include page="/WEB-INF/views/common/modal/loginConfirm.jsp"/>
-    <%-- <jsp:include page="/WEB-INF/views/common/modal/message.jsp"/> --%>
 
 
     <%-- 메세지 모달창 --%>
@@ -193,7 +178,6 @@
         let sort = "${param.sort}";
 
         const inputQuery = document.getElementById("inputQuery");
-        // let query = inputQuery.value;
         let query = "${param.query}";
         let key = "${param.key}";
 

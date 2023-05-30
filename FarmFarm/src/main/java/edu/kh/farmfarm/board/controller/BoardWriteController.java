@@ -32,7 +32,7 @@ public class BoardWriteController {
 	@Autowired
 	private BoardWriteService service;
 	
-	@GetMapping("/board/write/{boardTypeNo}")
+	@GetMapping("/boards/{boardTypeNo}/writing")
 	private String boardWritePage(Model model,
 			@PathVariable("boardTypeNo") int boardTypeNo) {
 		model.addAttribute("boardTypeNo", boardTypeNo);
@@ -41,7 +41,7 @@ public class BoardWriteController {
 	
 	
 	// 와글와글 글쓰기
-	@PostMapping("/board/write")
+	@PostMapping("/boards/writing")
 	private String boardWrite(
 			Board board,
 			@RequestParam(value="imgs", required = false) List<MultipartFile> imgList,
@@ -65,11 +65,9 @@ public class BoardWriteController {
 		String path = null;
 		String message = null;
 		
-//		int typeNo = board.getBoardTypeNo();
-		
 		if(boardNo > 0) {
 			message="게시글이 등록되었습니다.";
-			path = "/board/"+boardTypeNo+"/"+boardNo;
+			path = "/boards/"+boardTypeNo+"/"+boardNo;
 		}else {
 			message = "게시글 등록 실패";
 			path = referer;

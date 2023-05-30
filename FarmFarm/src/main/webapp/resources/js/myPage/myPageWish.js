@@ -16,7 +16,7 @@ for (let page of pageBox) {
 /* cp를 받아 리뷰 목록 조회해오기 */
 const selectWishList = (cp) => {
   $.ajax({
-    url: "/wish/list",
+    url: "/wishes/list",
     data: { "cp": cp },
     dataType: "json",
     success: (map) => {
@@ -41,7 +41,7 @@ const printWishList = (wishList, pagination) => {
 
     const wishThumbnail = document.createElement('a');
     wishThumbnail.classList.add('wish-thumbnail');
-    wishThumbnail.href = '/product/' + wish.productNo;
+    wishThumbnail.href = '/products/' + wish.productNo;
 
     wishContainer.append(wishThumbnail);
 
@@ -63,7 +63,7 @@ const printWishList = (wishList, pagination) => {
     const wishTitle = document.createElement('a');
     wishTitle.classList.add('wish-title');
     wishTitle.innerHTML = wish.productName;
-    wishTitle.href = '/product/' + wish.productNo;
+    wishTitle.href = '/products/' + wish.productNo;
 
     const wishPrice = document.createElement('span');
     wishPrice.classList.add('wish-price');
@@ -169,16 +169,15 @@ for (let btn of wishDeleteBtn) {
 }
 
 const deleteWish = (productNo) => {
-  $.ajax({
-    url: "/wish/delete",
-    data: { "productNo": productNo },
-    success: (result) => {
 
-      selectWishList(selectCp());
 
-    },
-    error: () => {
-      console.log('찜목록 삭제중 에러 발생')
-    }
+  axios.delete('/wishes/' + productNo)
+  .then((response) => {
+    messageModalOpen("삭제되었습니다.");
+    selectWishList(selectCp());
   })
+  .catch((error) => {
+    console.log('찜목록 삭제중 에러 발생');
+  });
+
 }

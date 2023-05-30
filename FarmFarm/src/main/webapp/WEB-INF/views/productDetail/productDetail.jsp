@@ -68,7 +68,7 @@
           </c:if>
           </c:forEach>
         </div>
-        <form action="/orderPage" method="POST" class="summary-area" id="orderPage">
+        <form action="/orders" method="GET" class="summary-area" id="orderPage">
           <input type="hidden" name="pList[0].productNo" value="${product.productNo}">
           <input type="hidden" name="pList[0].productImg" value="${productImgList[0].productImgAddress}">
           <input type="hidden" name="pList[0].productPrice" value="${fn:replace(product.productPrice, ',', '')}">
@@ -357,6 +357,8 @@
   <!-- jquery -->
   <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
 
+  <!-- axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   
   <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>

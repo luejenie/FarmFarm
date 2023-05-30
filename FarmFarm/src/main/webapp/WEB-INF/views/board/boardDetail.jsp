@@ -30,9 +30,9 @@
             </section>
             <section class="board-nav">
                 <div class="board-nav-area">
-                    <a href="/board/${1}" id="type1">자유게시판</a>
-                    <a href="/board/${2}" id="type2">팁</a>
-                    <a href="/board/${3}" id="type3">질문</a>
+                    <a href="/boards/${1}" id="type1">자유게시판</a>
+                    <a href="/boards/${2}" id="type2">팁</a>
+                    <a href="/boards/${3}" id="type3">질문</a>
                 </div>
             </section>
             <section class="board-title-content">
@@ -118,6 +118,9 @@
         let key = "${param.key}";
         // let sort = "${param.sort}";
     </script>
+
+    <%-- axios --%>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     
     <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
     <jsp:include page="/WEB-INF/views/common/modal/message.jsp"/> 
@@ -132,7 +135,6 @@
 
     <script src="/resources/js/board/boardDetail.js"> </script>
     <script src="/resources/js/board/comment.js"> </script>
-    <%-- <script src="/resources/js/common/common.js"> </script> --%>
 
     <script src="/resources/js/board/boardList.js"> </script>
 

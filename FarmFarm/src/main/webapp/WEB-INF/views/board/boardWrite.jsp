@@ -23,7 +23,7 @@
         <section class="board-top">
             <div class="board-top-title">와글와글 글쓰기</div>
         </section>
-        <form action="/board/write" method="post" encType="multipart/form-data">
+        <form action="/boards/writing" method="post" encType="multipart/form-data">
             <section class="board-category">
                 <div class="board-category-area">
                     <span class="category">카테고리 선택</span>
@@ -88,7 +88,6 @@
                         <input type="file" class="board-input-img" id="img4" name="imgs" accept="img/*">
                         <span class="board-img-delete"><i class="fa-solid fa-xmark"></i></span>
                     </div>
-                    
                     
                 </div>
             </section>

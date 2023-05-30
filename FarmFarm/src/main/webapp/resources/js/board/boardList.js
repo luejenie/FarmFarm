@@ -2,20 +2,13 @@ const boardSearch = document.querySelector(".board-search");
 
 if(boardSearch != null){
 
-    // 게시글 목록을 ajax로 불러와봅시다!
-    // 불러오는 부분을 만들어서 appen 시켜주기
-
-    // board-list-title의 원래 모양을 저장을 위한 변수선언
-    let beforeBoardListTitle;
-
     const showBoardList = (cp, sort, query, key)=>{
 
         // board-list-title의 원래 모양을 저장
         const boardListTitle = document.querySelector(".board-List-title");
 
-
         $.ajax({
-            url : "/board/list/"+boardTypeNo,
+            url : "/boards/list/"+boardTypeNo,
             data : {"boardTypeNo" : boardTypeNo,
                     "cp" : cp,
                     "query" : query,
@@ -30,23 +23,15 @@ if(boardSearch != null){
                 const query = boardMap.query;
                 const sort = boardMap.sort;
 
-                console.log(query);
-                console.log("ok");
-
                 let sURL;
 
                 sURL = "&key="+key+"&query="+query+"&sort="+sort;
-
-                console.log("확인해보자2 cp : "+cp);
-                console.log("확인해보자2 sort : "+sort);
-                console.log("확인해보자2 key : "+key);
-                console.log("확인해보자2 query : "+query);
 
                 // 리스트들을 감싸고 있는거 없애주기
                 const boardListTop = document.querySelector(".board-list-top");
                 boardListTop.innerHTML = "";
 
-                // ul태그 부분을 만들어봅시당~
+                // ul태그 부분을 만들기
                 const boardListArea = document.createElement("ul");
                 boardListArea.classList.add("board-list-area")
             
@@ -67,7 +52,6 @@ if(boardSearch != null){
                         boardTitle.classList.add("board-title");
                         const goBoard = document.createElement("a");
                         goBoard.classList.add("goBoard");
-                        // goBoard.setAttribute("href", "/board/"+boardTypeNo+"/"+board.boardNo+"?cp="+pagination.currentPage+sURL+soURL);
                         goBoard.innerHTML = board.boardTitle+"&nbsp;("+board.commentCount+")";
                         boardTitle.append(goBoard);
                         
@@ -87,7 +71,7 @@ if(boardSearch != null){
                         boardListArea.append(li);
                         
                         if(authority != 1){
-                            goBoard.setAttribute("href", "/board/"+boardTypeNo+"/"+board.boardNo+"?cp="+pagination.currentPage+sURL);
+                            goBoard.setAttribute("href", "/boards/"+boardTypeNo+"/"+board.boardNo+"?cp="+pagination.currentPage+sURL);
                         }else{
                             goBoard.addEventListener("click", ()=>{
                                 messageModalOpen("판매자는 게시글 조회가 불가능합니다.");
@@ -98,7 +82,7 @@ if(boardSearch != null){
                     }
                 }
 
-                // 페이지네이션 부분임돵
+                // 페이지네이션 부분
                 const boardWriteBottom = document.createElement("div");
                 boardWriteBottom.classList.add("board-write-bottom");
 
@@ -110,8 +94,7 @@ if(boardSearch != null){
                 firstLi.setAttribute("id", 1);
                 firstLi.classList.add("pageLi");
                 const firstA = document.createElement("a");
-                firstA.setAttribute("href", "/board/"+boardTypeNo+"?cp=1"+sURL);
-                // firstA.setAttribute("href", "/board/"+boardTypeNo+"?cp=1"+sURL+soURL);
+                firstA.setAttribute("href", "/boards/"+boardTypeNo+"?cp=1"+sURL);
                 firstA.innerHTML = "&lt;&lt;";
                 firstLi.append(firstA);
                 
@@ -120,8 +103,7 @@ if(boardSearch != null){
                 prevLi.setAttribute("id", pagination.prevPage);
                 prevLi.classList.add("pageLi");
                 const prevA = document.createElement("a");
-                prevA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+pagination.prevPage+sURL);
-                // prevA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+pagination.prevPage+sURL+soURL);
+                prevA.setAttribute("href", "/boards/"+boardTypeNo+"?cp="+pagination.prevPage+sURL);
                 prevA.innerHTML = "&lt;";
                 prevLi.append(prevA);
                 
@@ -130,22 +112,20 @@ if(boardSearch != null){
                 nextLi.setAttribute("id", pagination.nextPage);
                 nextLi.classList.add("pageLi");
                 const nextA = document.createElement("a");
-                // nextA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+pagination.nextPage+sURL+soURL);
-                nextA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+pagination.nextPage+sURL);
+                nextA.setAttribute("href", "/boards/"+boardTypeNo+"?cp="+pagination.nextPage+sURL);
                 nextA.innerHTML = "&gt;";
                 nextLi.append(nextA);
                 
-                // 끝 페이지로 이동동동
+                // 끝 페이지로 이동
                 const maxLi = document.createElement("li");
                 maxLi.setAttribute("id", pagination.maxPage);
                 maxLi.classList.add("pageLi");
                 const maxA = document.createElement("a");
-                maxA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+pagination.maxPage+sURL);
-                // maxA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+pagination.maxPage+sURL+soURL);
+                maxA.setAttribute("href", "/boards/"+boardTypeNo+"?cp="+pagination.maxPage+sURL);
                 maxA.innerHTML = "&gt;&gt;";
                 maxLi.append(maxA);
                 
-                // 숫자가 나올 부분들임돵
+                // 숫자가 나올 부분
                 
                 boardPagination.append(firstLi, prevLi, nextLi, maxLi);
                 
@@ -161,8 +141,7 @@ if(boardSearch != null){
                         
                     }else{
                         pageNumLi.setAttribute("id", i);
-                        pageNumA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+i+sURL)
-                        // pageNumA.setAttribute("href", "/board/"+boardTypeNo+"?cp="+i+sURL+soURL)
+                        pageNumA.setAttribute("href", "/boards/"+boardTypeNo+"?cp="+i+sURL)
                         pageNumA.innerText=i;
                         pageNumLi.append(pageNumA);
                     }
@@ -172,7 +151,7 @@ if(boardSearch != null){
                 if(loginYN != "" && authority != 1){
                     const writeA = document.createElement("a");
                     writeA.classList.add("board-write");
-                    writeA.setAttribute("href", "/board/write/"+boardTypeNo);
+                    writeA.setAttribute("href", "/boards/"+boardTypeNo+"/writing");
                     writeA.innerText="글쓰기";
                     boardWriteBottom.append(boardPagination, writeA);
                     
@@ -193,7 +172,6 @@ if(boardSearch != null){
                     })
                 }
 
-                
                 const boardWriter = document.getElementsByClassName("board-writer");
                 if(boardWriter.length > 0){ 
             
@@ -227,7 +205,6 @@ if(boardSearch != null){
                     }
                 }
 
-
                 
                 // 페이지 선택 시
                 const pageLis = document.querySelectorAll(".pageLi > a");
@@ -251,24 +228,16 @@ if(boardSearch != null){
                             boardSort.innerHTML = "최신순 ";
                             showBoardList(cp, sort, query, key);
                         }
-                        console.log(cp);
-                        console.log(sort);
-                        console.log(query);
 
                         e.preventDefault();
                         
                     })
 
-
                 }
                 urlChange(cp, sort, key, query);
-                console.log("확인해보자 cp : "+cp);
-                console.log("확인해보자 sort : "+sort);
-                console.log("확인해보자 key : "+key);
-                console.log("확인해보자 query : "+query);
             },
             error : ()=>{
-                alert("리스트 조회 ajax 통신 시류ㅐㅠㅜㅠㅜ");
+                alert("리스트 조회 ajax 통신 실패");
             }
         })
 
@@ -276,21 +245,6 @@ if(boardSearch != null){
 
     ///////////////////////////////////////////////////
         if(location.search != ""){
-
-            console.log("목록으로 cp : "+cp);
-            console.log("목록으로 key : "+key);
-            console.log("목록으로 query : "+query);
-            console.log("목록으로 sort : "+sort);
-
-        //     // if(key == null){
-        //     //     key == 't';
-        //     // }
-        //     // if(query == null){
-        //     //     query == "";
-        //     // }
-        //     // if(sort == null){
-        //     //     sort == 'new';
-        //     // }
 
             showBoardList(cp, sort, query, key);
         }
@@ -303,19 +257,19 @@ if(boardSearch != null){
     const type1 = document.getElementById("type1");
     const type2 = document.getElementById("type2");
     const type3 = document.getElementById("type3");
-    if(boardAdd == '/board/1'){
+    if(boardAdd == '/boards/1'){
         boardTitle.innerHTML = "와글와글 자유게시판";
         type1.classList.add("nowType");
         type2.classList.remove("nowType");
         type3.classList.remove("nowType");
     }
-    if(boardAdd == '/board/2'){
+    if(boardAdd == '/boards/2'){
         boardTitle.innerHTML="와글와글 팁";
         type1.classList.remove("nowType");
         type2.classList.add("nowType");
         type3.classList.remove("nowType");
     }
-    if(boardAdd == '/board/3'){
+    if(boardAdd == '/boards/3'){
         boardTitle.innerHTML="와글와글 질문";
         type1.classList.remove("nowType");
         type2.classList.remove("nowType");
@@ -327,7 +281,6 @@ if(boardSearch != null){
     // 검색 시 검색어 유지시키기
     (()=>{
         const inputQuery = document.getElementById("inputQuery");
-        // const select = document.getElementById("search-key");
         const option = document.querySelectorAll("#search-key > option");
         
         if(inputQuery != null){
@@ -342,16 +295,14 @@ if(boardSearch != null){
 
                 // option의 value와 key가 일치할 때
                 if(op.value == key){
-                    // op.setAttribute("selected", true); // 밑에처럼 간단히 쓸 수도 있데
                     op.selected = true;
                 }
             }
 
-            console.log("key2:"+key);
         }
     })();
 
-    // 로그인안된 회원은 못가게 막아보자
+    // 로그인 안된 회원은 게시글 조회 안되게 이벤트 설정.
     const goBoard = document.getElementsByClassName("goBoard");
     for(let go of goBoard){
         go.addEventListener("click", e=>{
@@ -363,7 +314,7 @@ if(boardSearch != null){
     }
 
 
-    // 정렬을 누르면 밑에 정렬이 뜨게 만들어 볼까~~?
+    // 정렬을 누르면 밑에 정렬 항목이 뜨게 함.
     const boardNowSort = document.querySelector(".board-now-sort");
     const boardSelectSort = document.querySelector(".board-select-sort");
     boardNowSort.addEventListener("click", ()=>{
@@ -441,9 +392,6 @@ if(boardSearch != null){
     for(let a of pageLis){
         a.addEventListener("click", (e)=>{
 
-            console.log("1");
-            
-            
             const cp = a.parentElement.id;
             
             if(sort == 'view'){
@@ -461,14 +409,8 @@ if(boardSearch != null){
                 boardSort.innerHTML = "최신순 ";
                 showBoardList(cp, sort, query, key);
             }
-            console.log("2");
-            console.log("cp"+cp);
-            console.log(sort);
-            console.log("3");
 
             showBoardList(cp, sort, query, key);
-
-            // e.preventDefault();
 
         })
     };
@@ -480,7 +422,7 @@ if(boardSearch != null){
         const state = {'cp':cp, 'sort':sort, 'key':key, 'query':query}
         const title = '';
 
-        const reUrl = "/board/"+boardTypeNo+"?cp="+cp+"&key="+key+"&query="+query+"&sort="+sort;
+        const reUrl = "/boards/"+boardTypeNo+"?cp="+cp+"&key="+key+"&query="+query+"&sort="+sort;
 
         history.pushState(state, title, reUrl);
     }

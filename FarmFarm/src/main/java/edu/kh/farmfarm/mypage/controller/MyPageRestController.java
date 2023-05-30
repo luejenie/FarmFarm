@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -23,12 +28,17 @@ import edu.kh.farmfarm.mypage.model.service.MyPageService;
 import edu.kh.farmfarm.productDetail.model.vo.Review;
 
 @RestController
-public class myPageRestController {
+public class MyPageRestController {
 	
 	@Autowired
 	private MyPageService service;
 	
-	@GetMapping("/order/list")
+	/** 주문 내역 조회
+	 * @param loginMember
+	 * @param cp
+	 * @return
+	 */
+	@GetMapping("/orders/list")
 	public String selectOrderList(
 			@SessionAttribute("loginMember")Member loginMember,
 			@RequestParam(value="cp", required=false, defaultValue = "1") int cp
@@ -42,12 +52,19 @@ public class myPageRestController {
 	}
 	
 	
-	@GetMapping("/review/list")
+	/** 작성 후기 목록 조회
+	 * @param loginMember
+	 * @param cp
+	 * @return
+	 */
+	@GetMapping("/reviews/list/{currentPage}")
 	public String selectReviewList(
 			@SessionAttribute("loginMember")Member loginMember,
-			@RequestParam(value="cp", required=false, defaultValue = "1") int cp
+			@PathVariable(value="currentPage", required=false) Optional<Integer> currentPage
 			) {
 		
+//		currentPage에 값이 존재하면 그 값을, 존재하지 않으면 1을 cp에 대입
+		int cp = currentPage.isPresent() ? currentPage.get() : 1;
 		
 		Map<String, Object> map = service.selectReviewList(loginMember, cp);
 		
@@ -56,7 +73,13 @@ public class myPageRestController {
 	}
 	
 	
-	@GetMapping("/board/list")
+	/** 작성 게시글 목록 조회
+	 * @param loginMember
+	 * @param cp
+	 * @param sortFl
+	 * @return
+	 */
+	@GetMapping("/boards/list")
 	public String selectBoardList(
 			@SessionAttribute("loginMember")Member loginMember,
 			@RequestParam(value="cp", required=false, defaultValue = "1") int cp,
@@ -75,7 +98,12 @@ public class myPageRestController {
 		return new Gson().toJson(map);
 	}
 	
-	@GetMapping("/comment/list")
+	/** 작성 댓글 목록 조회
+	 * @param loginMember
+	 * @param cp
+	 * @return
+	 */
+	@GetMapping("/comments/list")
 	public String selectCommentList(
 			@SessionAttribute("loginMember")Member loginMember,
 			@RequestParam(value="cp", required=false, defaultValue = "1") int cp
@@ -90,7 +118,12 @@ public class myPageRestController {
 		return new Gson().toJson(map);
 	}
 	
-	@GetMapping("/wish/list")
+	/** 찜 목록 조회
+	 * @param loginMember
+	 * @param cp
+	 * @return
+	 */
+	@GetMapping("/wishes/list")
 	public String selectWishList(
 			@SessionAttribute("loginMember")Member loginMember,
 			@RequestParam(value="cp", required=false, defaultValue = "1") int cp
@@ -106,7 +139,14 @@ public class myPageRestController {
 	}
 	
 	
-	@PostMapping("/myPage/update/bgImg")
+	/** 프로필 배경 이미지 변경
+	 * @param mypageImg
+	 * @param loginMember
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@PostMapping("/myPage/bgImg")
 	public int updateBgImg(@RequestParam(value="mypageImg") MultipartFile mypageImg, 
 			@SessionAttribute("loginMember") Member loginMember,
 			HttpServletRequest req) throws Exception {
@@ -120,7 +160,11 @@ public class myPageRestController {
 		return service.updateBgImg(webPath, filePath, mypageImg, loginMember);
 	}
 	
-	@GetMapping("/myPage/default/bgImg")
+	/** 기본 배경이미지로 변경
+	 * @param loginMember
+	 * @return
+	 */
+	@PatchMapping("/myPage/bgImg")
 	public int defaultBgImg(@SessionAttribute("loginMember") Member loginMember) {
 		
 		loginMember.setMypageImg("/resources/images/default/bgImg.png");
@@ -129,13 +173,26 @@ public class myPageRestController {
 	}
 
 	
-	@GetMapping("/order/confirm")
-	public int orderConfirm(int orderNo) {
+	/** 구매 확정
+	 * @param orderNo
+	 * @return
+	 */
+	@PatchMapping("/orders/{orderNo}/confirm")
+	public int orderConfirm(@PathVariable("orderNo") int orderNo) {
 		
 		return service.orderConfirm(orderNo);
 	}
 	
-	@PostMapping("/review/write")
+	/** 후기 등록
+	 * @param review
+	 * @param reviewContent
+	 * @param loginMember
+	 * @param req
+	 * @param imageList
+	 * @return
+	 * @throws IOException
+	 */
+	@PostMapping("/reviews")
 	public int writeReview(Review review, String reviewContent,
 			@SessionAttribute("loginMember") Member loginMember,
 			HttpServletRequest req,
@@ -156,9 +213,14 @@ public class myPageRestController {
 	}
 	
 	
-	@GetMapping("/wish/delete")
+	/** 찜 목록 삭제
+	 * @param loginMember
+	 * @param productNo
+	 * @return
+	 */
+	@DeleteMapping("/wishes/{productNo}")
 	public int deleteWish(@SessionAttribute("loginMember") Member loginMember,
-			int productNo) {
+			@PathVariable("productNo") int productNo) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("productNo", productNo);

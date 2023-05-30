@@ -17,20 +17,30 @@ var memberSelectTable = document.getElementById("memberSelectTable");
 // optimize 
 /** 전체 회원 정보 조회 함수 */
 const selectMemberList = (cp) => {
-    $.ajax({
-        url: "/admin/memberList",
-        data: { "cp": cp, "authFilter": authFilter, "statFilter": statFilter, "keyword": keyword },
-        dataType: "JSON",
-        type: "GET",
-        success: (map) => {
-
-            printMemberList(map.memberList, map.pagination);
-
-        },
-        error: () => {
-            console.log("cp 받아 회원 정보 조회 실패");
-        }
+    axios.get("/admin/members/list", {
+        params: { "cp": cp, "authFilter": authFilter, "statFilter": statFilter, "keyword": keyword}
+    })
+    .then((response) => { // 성공
+        const map = response.data;
+        printMemberList(map.memberList, map.pagination);
+    }).catch(() => {
+        console.log("회원 정보 조회 실패");
     });
+
+    // $.ajax({
+    //     url: "/admin/member/list",
+    //     data: { "cp": cp, "authFilter": authFilter, "statFilter": statFilter, "keyword": keyword },
+    //     dataType: "JSON",
+    //     type: "GET",
+    //     success: (map) => {
+
+    //         printMemberList(map.memberList, map.pagination);
+
+    //     },
+    //     error: () => {
+    //         console.log("cp 받아 회원 정보 조회 실패");
+    //     }
+    // });
 }
 
 
@@ -39,18 +49,28 @@ const selectMemberList = (cp) => {
  * @param hiddenNo
 */
 const selectMemberDetail = (hiddenNo) => {
-    $.ajax({
-        url: "/admin/memberDetail",
-        data: { "hiddenNo": hiddenNo },
-        dataType: "JSON",
-        type: "GET",
-        success: (map) => {
-            printMemberDetail(map.memberDetailInfo, map.memberHistoryList);
-        },
-        error: () => {
-            console.log("회원 상세 정보 조회 실패");
-        }
-    })
+
+    axios.get("/admin/members/"+hiddenNo)
+    .then((response) => { // 성공
+        const map = response.data;
+        printMemberDetail(map.memberDetailInfo, map.memberHistoryList);
+    }).catch(() => {
+        console.log("회원 상세 정보 조회 실패");
+    });
+ 
+
+    // $.ajax({
+    //     url: "/admin/member/" + hiddenNo,
+    //     data: { "hiddenNo": hiddenNo },
+    //     dataType: "JSON",
+    //     type: "GET",
+    //     success: (map) => {
+    //         printMemberDetail(map.memberDetailInfo, map.memberHistoryList);
+    //     },
+    //     error: () => {
+    //         console.log("회원 상세 정보 조회 실패");
+    //     }
+    // })
 }
 
 
@@ -113,8 +133,8 @@ const printMemberList = (memberList, pagination) => {
         // 아이디
         const td3 = document.createElement("td");
 
-        if (member.memberId.length > 9) {
-            td3.innerText = member.memberId.substring(0, 9) + '...';
+        if (member.memberId.length > 7) {
+            td3.innerText = member.memberId.substring(0, 7) + '...';
         } else {
             td3.innerText = member.memberId;
         }
@@ -123,8 +143,8 @@ const printMemberList = (memberList, pagination) => {
         // 닉네임
         const td4 = document.createElement("td");
 
-        if (member.memberNickname.length > 9) {
-            td4.innerText = member.memberNickname.substring(0, 9) + '...';
+        if (member.memberNickname.length > 7) {
+            td4.innerText = member.memberNickname.substring(0, 7) + '...';
         } else {
             td4.innerText = member.memberNickname;
         }
@@ -323,7 +343,11 @@ const printMemberDetail = (memberDetailInfo, memberHistoryList) => {
     memberBirth.innerText = "생년월일";
 
     const tdBirth = document.createElement("td");
-    tdBirth.innerText = memberDetailInfo.memberBirth;
+    if(memberDetailInfo.memberBirth != null) {
+        tdBirth.innerText = memberDetailInfo.memberBirth;
+    } else {
+        tdBirth.innerText = "";
+    }
 
 
     // 3)
@@ -528,22 +552,19 @@ const printMemberDetail = (memberDetailInfo, memberHistoryList) => {
 
         let volume = history.reportVolume;
 
-        if(volume <= 2 || history.reportPenalty == null) {
+        if(volume <= 2 || history.reportPenalty == null || (history.reportPenalty =='N' && history.processDate != null)) {
             document.getElementById("memberHistorySpan").style.height = '150px';
             document.getElementById("memberHistorySpan").style.overflow = 'hidden';
         } else  {
-            document.getElementById("memberHistorySpan").style.height = '400px';
+            // document.getElementById("memberHistorySpan").style.height = '400px';
+            document.getElementById("memberHistorySpan").classList.add("member-history");
+            document.getElementById("memberHistorySpan").style.height = 'auto';
+            document.getElementById("memberHistorySpan").style.maxHeight = '300px';
+            document.getElementById("memberHistorySpan").style.overflow = 'scroll';
+            
         }
 
-        // if (history.reportPenalty == null) {
-            // tdReportDate.innerHTML = "";
-            // tdReport.innerHTML = "";
-            // tdReportReason.innerHTML = "";
-        // }
-
-
         // 3) 신고 처리 내역
-        
         if (history.processDate != null){
             if (history.memberDelFl == 'N') {
                 // 강제 탈퇴 버튼 활성화
@@ -552,8 +573,9 @@ const printMemberDetail = (memberDetailInfo, memberHistoryList) => {
                 adminDelBtn.disabled = false;
 
 
+                // 정지(Y), 정지 후 활성화(A) 상태
                 if (history.reportPenalty == 'Y' || history.reportPenalty == 'A') {
-                    tdReportDate.innerText = history.reportDate;
+                    tdReportDate.innerText = history.processDate;
                     // tdReportDate.innerText = history.processDate;
                     // fixme: 원래 processDate가 맞음. 정지 계정이 활성화된 시각임.
                     // 원래 정지 해제 스케줄링을 매 초로 했었는데 부하가 너무 심해서
@@ -565,19 +587,19 @@ const printMemberDetail = (memberDetailInfo, memberHistoryList) => {
 
                     if(volume == 1){
                         tdReportReason.innerText = history.reportReason
-                    } else if (volume > 1) {
-                        tdReportReason.innerText = history.reportReason + " 외 " + (volume -1) + "건";
+                    } else if (history.reportMVolume > 1) {
+                        tdReportReason.innerText = history.reportReason + " 외 " + history.reportMVolume + "건";
                     }
-
+                } else {
+                    tdReport.innerHTML = "신고 반려";
+                    tdReportDate.innerHTML = history.processDate;
+                    tdReportReason.innerText = history.reportReason + " 외 " + history.reportMVolume + "건";
                 }
     
                 // 강제 탈퇴 버튼 활성화
                 adminDelBtn.style.backgroundColor = '#C43819';
                 adminDelBtn.style.cursor = 'pointer';
                 adminDelBtn.disabled = false;
-                
-                // }
-
                 
 
             }
@@ -588,23 +610,6 @@ const printMemberDetail = (memberDetailInfo, memberHistoryList) => {
             tdReportReason.innerText = "";
         }
 
-        // 강제 탈퇴 버튼 누르면,
-        // if(history.reportPenalty == 'Y'){
-        // adminDelBtn.addEventListener('click', () => {
-
-        //     // 가입일자, 가입 상태에 취소선 긋기
-        //     td4.style.textDecoration = 'line-through';
-        //     td5.style.textDecoration = 'line-through';
-
-        //     // 강제 탈퇴 버튼 비활성화
-        //     adminDelBtn.style.backgroundColor = 'lightgray';
-        //     adminDelBtn.style.cursor = 'default';
-        //     adminDelBtn.disabled = true;
-        // })
-
-        // 신고 처리 내역이 있을 때 조립
-        // if (history.reportPenalty != null) {
-        // }
         trReport.append(tdReportDate, tdReport, tdReportReason);
         tbodyHistory.append(trReport);
     }
@@ -899,7 +904,6 @@ for(let i=0; i<dropBtn2TextArr.length; i++){
 
 
 // todo: 강제 탈퇴 시키기 (by 관리자)
-//fixme: 안 비워줘서 바로바로 적용이 안되는 것 같다..
 // 강제 탈퇴 버튼 클릭 시 모달 열리기
 const adminDelBtn = document.getElementById("adminDelBtn");
 
@@ -912,31 +916,51 @@ adminDelBtn.addEventListener('click', () => {
 // 모달에서 강제 탈퇴 제출 버튼 클릭 시
 document.getElementById("adminDelSubmitBtn").addEventListener('click', () => {
 
-    $.ajax({
-        url: "/admin/kickout",
-        data: { "hiddenNo": hiddenNo },
-        type: "POST",
-        success: (result) => {
-            if (result > 0) {
-                adminModalClose();
+    //fix: restful api로 바꾸기 + axios로 변경
+    axios.patch("/admin/member/"+hiddenNo+ "/kickout")
+    .then((response) => { // 성공
+        const result = response.data;
+        
+        if (result > 0) {
+            adminModalClose();
 
-                selectMemberList(cp);
-                selectMemberDetail(hiddenNo);
+            selectMemberList(cp);
+            selectMemberDetail(hiddenNo);
 
-                console.log("강제 탈퇴 완료");
-                messageModalOpen("강제 탈퇴 되었습니다.");
+            console.log("강제 탈퇴 완료");
+            messageModalOpen("강제 탈퇴 되었습니다.");
 
-                //fixme: 시간 남을 때 모달이랑, 스크롤 위치 수정
-
-
-            } else {
-                console.log("강퇴 처리 실패");
-            }
-        },
-        error: () => {
-            console.log("강퇴 처리 오류");
+        } else {
+            console.log("강퇴 처리 실패");
         }
+
+    }).catch(() => {
+         console.log("강퇴 처리 오류");
     });
+
+
+    // $.ajax({
+    //     url: "/admin/kickout",
+    //     data: { "hiddenNo": hiddenNo },
+    //     type: "POST",
+    //     success: (result) => {
+    //         if (result > 0) {
+    //             adminModalClose();
+
+    //             selectMemberList(cp);
+    //             selectMemberDetail(hiddenNo);
+
+    //             console.log("강제 탈퇴 완료");
+    //             messageModalOpen("강제 탈퇴 되었습니다.");
+
+    //         } else {
+    //             console.log("강퇴 처리 실패");
+    //         }
+    //     },
+    //     error: () => {
+    //         console.log("강퇴 처리 오류");
+    //     }
+    // });
 });
 
 
@@ -1001,8 +1025,8 @@ const searchNoResult = () => {
 // jsp 첫 페이지 글자 자르기
 const mId = document.getElementsByClassName("mId");
 for (let i = 0; i < mId.length; i++) {
-    if (mId[i].innerText.length > 9) {
-        mId[i].innerText = mId[i].innerText.substring(0, 9) + '...';
+    if (mId[i].innerText.length > 7) {
+        mId[i].innerText = mId[i].innerText.substring(0, 7) + '...';
     } else {
         mId[i].innerText;
     }
@@ -1010,8 +1034,8 @@ for (let i = 0; i < mId.length; i++) {
 
 const mNickname = document.getElementsByClassName("mNickname");
 for (let i = 0; i < mId.length; i++) {
-    if (mNickname[i].innerText.length > 9) {
-        mNickname[i].innerText = mNickname[i].innerText.substring(0, 9) + '...';
+    if (mNickname[i].innerText.length > 7) {
+        mNickname[i].innerText = mNickname[i].innerText.substring(0, 7) + '...';
     } else {
         mNickname[i].innerText;
     }

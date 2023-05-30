@@ -11,13 +11,18 @@ import edu.kh.farmfarm.mypage.model.service.MyPageService;
 import edu.kh.farmfarm.mypage.model.vo.Order;
 
 @Controller
-public class myPageOrderController {
+public class MyPageOrderController {
 	
 	@Autowired
 	private MyPageService service;
 	
 	
-	@GetMapping("/return/{orderNo}")
+	/** 반품 신청 페이지로 이동
+	 * @param orderNo
+	 * @param model
+	 * @return
+	 */
+	@GetMapping("/returns/{orderNo}")
 	public String returnOrder(
 			@PathVariable("orderNo") int orderNo,
 			Model model

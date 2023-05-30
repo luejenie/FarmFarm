@@ -22,7 +22,6 @@ import edu.kh.farmfarm.board.model.service.BoardListService;
 import edu.kh.farmfarm.board.model.vo.Board;
 import edu.kh.farmfarm.member.model.VO.Member;
 
-//@RestController
 @SessionAttributes({"loginMember"})
 @Controller
 public class BoardListController {
@@ -43,34 +42,23 @@ public class BoardListController {
 	}
 	
 	// 와글와글 게시판의 목록 불러오기
-	@GetMapping("/board/{boardTypeNo}")
+	@GetMapping("/boards/{boardTypeNo}")
 	public String boardList (
 			@PathVariable("boardTypeNo") int boardTypeNo,
 			Model model,
 			@RequestParam(value="cp", required = false, defaultValue = "1") int cp,
-//			@RequestParam(value="sort", required = false, defaultValue = "new") String sort,
 			@RequestParam Map<String, Object> pm) {
 		
-//			String key = null;
-//			String query = null;
 		
 //			// 검색 안하는 경우
 			if(pm == null) {
 				pm.put("key", "t");
 				pm.put("query", null);
-//				key = "t";
 			}
-//			else {
-//				key = (String)pm.get("key");
-//				query = (String)pm.get("query");
-//			}
 
 			pm.put("boardTypeNo", boardTypeNo);
-//			pm.put("sort", sort);
 			
 			Map<String, Object> boardMap = service.selectBoardList(pm, cp);
-//			boardMap.put("key", key);
-//			boardMap.put("query", query);
 			model.addAttribute("boardMap", boardMap);
 			
 		return "board/boardList";
@@ -79,7 +67,7 @@ public class BoardListController {
 	
 //	// 와글와글 게시판의 목록 불러오기
 	// + ajax로 요청한 목록 + 정렬
-	@GetMapping("/board/list/{boardTypeNo}")
+	@GetMapping("/boards/list/{boardTypeNo}")
 	@ResponseBody
 	public String boardList (
 			Model model,
@@ -113,7 +101,7 @@ public class BoardListController {
 
 
 	// 프로필 클릭시 모달
-	@GetMapping("/board/member/{memberNo}")
+	@GetMapping("/boards/member/{memberNo}")
 	@ResponseBody
 	public String selectMemPro(
 			@SessionAttribute("loginMember") Member loginMember,

@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,9 +36,9 @@ public class ReviewController {
 	 * @param reviewNo
 	 * @return
 	 */
-	@GetMapping("/select/review/{reviewNo}")
+	@GetMapping("/reviews/{reviewNo}")
 	public String reviewDetail(int memberNo, 
-			@PathVariable("reviewNo")int reviewNo) {
+			@PathVariable("reviewNo") int reviewNo) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		
@@ -54,7 +54,7 @@ public class ReviewController {
 	 * @param productNo
 	 * @return
 	 */
-	@GetMapping("/select/reviewImgList")
+	@GetMapping("/reviews/images")
 	public String selectImgReview(int productNo) {
 		
 		List<Review> reviewList = service.selectImgReview(productNo);
@@ -68,7 +68,7 @@ public class ReviewController {
 	 * @param reviewNo
 	 * @return
 	 */
-	@GetMapping("/help/add")
+	@PostMapping("/helps")
 	public int addHelp(@SessionAttribute("loginMember") Member loginMember, int reviewNo) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -79,12 +79,13 @@ public class ReviewController {
 		return service.addHelp(map);
 	}
 	
+	
 	/** 도움돼요 취소
 	 * @param loginMember
 	 * @param reviewNo
 	 * @return
 	 */
-	@GetMapping("/help/remove")
+	@DeleteMapping("/helps")
 	public int removeHelp(@SessionAttribute("loginMember") Member loginMember, int reviewNo) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -95,6 +96,7 @@ public class ReviewController {
 		return service.removeHelp(map);
 	}
 	
+	
 	/** 리뷰 목록 조회
 	 * @param productNo
 	 * @param loginMember
@@ -102,7 +104,7 @@ public class ReviewController {
 	 * @param cp
 	 * @return
 	 */
-	@GetMapping("/select/review")
+	@GetMapping("/reviews")
 	public String selectReviewList(int productNo,
 			@SessionAttribute(name = "loginMember", required = false) Member loginMember,
 			@RequestParam(name = "sortFl", required = false, defaultValue = "R") String sortFl,
@@ -134,7 +136,7 @@ public class ReviewController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("/review/update")
+	@PostMapping("/reviews/{reviewNo}")
 	public int updateReview(Review review,
 			@SessionAttribute("loginMember") Member loginMember,
 			HttpSession session,
@@ -142,7 +144,6 @@ public class ReviewController {
 			@RequestParam(value = "deleteList", required = false) String deleteList
 			) throws Exception {
 		
-		System.out.println(review.getReviewNo());
 		
 		review.setMemberNo(loginMember.getMemberNo());
 		
@@ -158,8 +159,12 @@ public class ReviewController {
 	}
 	
 	
-	@GetMapping("/review/delete")
-	public int deleteReview(int reviewNo) {
+	/** 리뷰 삭제
+	 * @param reviewNo
+	 * @return result
+	 */
+	@PatchMapping("/reviews/{reviewNo}")
+	public int deleteReview(@PathVariable("reviewNo") int reviewNo) {
 		
 		return service.deleteReview(reviewNo);
 	}

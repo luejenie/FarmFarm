@@ -23,7 +23,7 @@
             <div class="board-top-title">와글와글 수정하기</div>
         </section>
 
-        <form action="/board/${boardTypeNo}/${board.boardNo}/update" method="post" encType="multipart/form-data">
+        <form action="/boards/${boardTypeNo}/${board.boardNo}/edit" method="post" encType="multipart/form-data">
             <section class="board-nav">
                 <div class="board-nav-area">
                     <span id="type1">자유게시판</span>
@@ -98,10 +98,10 @@
                 </div>
             </section>
             
-            <%-- 삭제 될 이미지를 저장해봅시다~ --%>
+            <%-- 삭제 될 이미지를 저장 --%>
             <input type="hidden" name="deleteImgList" id="deleteImgList" value="">
                     
-            <%-- 수정 후 리다이렉트를 위해 cp를 저장해볼까요? --%>
+            <%-- 수정 후 리다이렉트를 위해 cp를 저장--%>
             <input type="hidden" name="cp" value="${param.cp}">
         </form>
     </main>

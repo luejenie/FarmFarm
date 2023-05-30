@@ -24,6 +24,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,7 +53,14 @@ public class OrderController {
 	private OrderService service;
 	
 	
-	@PostMapping("/return/{orderNo}")
+	/** 반품 신청
+	 * @param returnInfo
+	 * @param pList
+	 * @param referer
+	 * @param ra
+	 * @return
+	 */
+	@PostMapping("/returns/{orderNo}")
 	public String returnOrder(Return returnInfo, ProductList pList, 
 			@RequestHeader(value = "referer") String referer, RedirectAttributes ra) {
 			
@@ -76,7 +85,13 @@ public class OrderController {
 		return "redirect:" + path;
 	}
 	
-	@PostMapping("/orderPage")
+	
+	/** 주문서로 이동
+	 * @param pList
+	 * @param model
+	 * @return
+	 */
+	@GetMapping("/orders")
 	public String orderPage(ProductList pList, Model model) {
 		
 		List<Product> productList = new ArrayList<>();
@@ -94,24 +109,24 @@ public class OrderController {
 	
 	
 	
+
 	/** 주문하기
 	 * @param order
 	 * @param pList
 	 * @param referer
 	 * @param loginMember
 	 * @param ra
-	 * @param impUid
-	 * @return
 	 * @throws IOException
 	 */
-	@PostMapping("/order")
+	@PostMapping("/orders")
 	public String order(Order order, ProductList pList, @RequestHeader("referer")String referer,
 			@SessionAttribute("loginMember")Member loginMember,
 			RedirectAttributes ra) throws IOException {
-		
 
+//		사용자 번호 얻어오기
 		order.setMemberNo(loginMember.getMemberNo());
 		
+//		주문정보와 주문할 상품목록을 매개변수로 하여 주문 내역 DB에 저장
 		int result = service.orderProduct(order, pList.getPList());
 		
 		String path = null;
@@ -136,9 +151,11 @@ public class OrderController {
 	 * @return
 	 * @throws IOException
 	 */
-	@GetMapping("/order/confirmBuy")
+	@GetMapping("/orders/confirm/{impUid}")
 	@ResponseBody
-	public String confirmBuy(int orderPrice, String impUid) throws IOException {
+	public String confirmBuy(
+			int orderPrice, 
+			@PathVariable("impUid") String impUid) throws IOException {
 		
 		String token = service.getToken();
 		System.out.println(token);
@@ -169,9 +186,10 @@ public class OrderController {
 	 * @return
 	 * @throws IOException
 	 */
-	@GetMapping("/order/cancel")
+	@PatchMapping("/orders/{orderNo}")
 	@ResponseBody
-	public int orderCancel(int orderNo) throws IOException {
+	public int orderCancel(
+			@PathVariable("orderNo")int orderNo) throws IOException {
 		
 		
 //		주문 결제 IMP_UID 얻어오기
@@ -183,15 +201,16 @@ public class OrderController {
 		
 		
 //		imp_uid 이용해서 환불 요청하기
-		int result = service.paymentCancel(token, order);
+		ImpToken cancelInfo = service.paymentCancel(token, order);
 		
-		if(result > 0) {
+		if(cancelInfo != null) {
 			
-			result = service.orderCancel(orderNo);
+			int result = service.orderCancel(orderNo);
+			return result;
 		}
 		
 		
-		return result;
+		return 0;
 	}
 	
 

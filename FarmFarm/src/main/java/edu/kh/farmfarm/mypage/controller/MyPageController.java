@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,7 +59,7 @@ public class MyPageController {
 	/** 마이페이지 작성 후기
 	 * @return
 	 */
-	@GetMapping("/review")
+	@GetMapping("/reviews")
 	public String myPageReview(
 			@SessionAttribute("loginMember")Member loginMember,
 			Model model,
@@ -76,10 +77,10 @@ public class MyPageController {
 	
 	
 	
-	/** 마이패이지 작성 게시글
+	/** 마이페이지 작성 게시글
 	 * @return
 	 */
-	@GetMapping("/board")
+	@GetMapping("/boards")
 	public String myPageBoard(
 		@SessionAttribute("loginMember")Member loginMember, 
 		Model model,
@@ -108,7 +109,7 @@ public class MyPageController {
 	 * @param cp
 	 * @return
 	 */
-	@GetMapping("/comment")
+	@GetMapping("/comments")
 	public String myPageComment(
 			@SessionAttribute("loginMember")Member loginMember, 
 			Model model,
@@ -133,7 +134,7 @@ public class MyPageController {
 	/** 마이페이지 찜목록
 	 * @return
 	 */
-	@GetMapping("/wishList")
+	@GetMapping("/wishes")
 	public String myPageWishList(
 			@SessionAttribute("loginMember")Member loginMember, 
 			Model model,
@@ -194,7 +195,7 @@ public class MyPageController {
 	/** 마이페이지 비밀번호 변경  
 	 * @return
 	 */
-	@PostMapping("/updatePw")
+	@PutMapping("/updatePw")
 	public String updatePw(
 			@RequestParam Map<String, Object> map,
 			RedirectAttributes ra,

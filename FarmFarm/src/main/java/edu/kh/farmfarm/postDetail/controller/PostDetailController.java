@@ -24,13 +24,22 @@ import edu.kh.farmfarm.postDetail.model.service.PostDetailService;
 import edu.kh.farmfarm.postDetail.model.vo.Post;
 import edu.kh.farmfarm.productDetail.model.vo.Product;
 
-@RequestMapping("/post")
+@RequestMapping("/posts")
 @Controller
 public class PostDetailController {
 	
 	@Autowired
 	private PostDetailService service;
 	
+	/** 판매글로 이동
+	 * @param loginMember
+	 * @param postNo
+	 * @param model
+	 * @param req
+	 * @param resp
+	 * @return
+	 * @throws ParseException
+	 */
 	@GetMapping("/{postNo}")
 	public String post(
 		@SessionAttribute(name = "loginMember", required = false) Member loginMember,
@@ -41,9 +50,6 @@ public class PostDetailController {
 		
 	//	파라미터 담을 객체 생성
 		Post post = service.selectPost(postNo);
-		
-
-		
 
 		
 		if(post != null) {

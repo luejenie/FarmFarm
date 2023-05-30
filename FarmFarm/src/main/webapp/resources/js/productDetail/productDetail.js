@@ -66,35 +66,27 @@ if (document.getElementById('wishBtn') != null) {
 
 /* 찜하기 Function*/
 const addWish = (productNo, wishBtn) => {
-  $.ajax({
-    url: '/wish/add',
-    data: { productNo: productNo, "memberNo": loginMemberNo },
-    success: (result) => {
-      wishBtn.classList.remove('wish-unclicked');
-      wishBtn.classList.add('wish-clicked');
+  axios.post('/wishes/' + loginMemberNo + "/" + productNo)
+  .then((result) => {
+    wishBtn.classList.remove('wish-unclicked');
+    wishBtn.classList.add('wish-clicked');
 
-      messageModalOpen("찜 목록에 추가되었습니다.");
-    },
-    error: () => {
-      console.log('찜 추가 중 오류 발생');
-    },
+    messageModalOpen("찜 목록에 추가되었습니다.");
+  }).catch((err) => {
+    console.log('찜 추가 중 오류 발생');
   });
 };
 
 /* 찜취소  Function*/
 const removeWish = (productNo, wishBtn) => {
-  $.ajax({
-    url: '/wish/remove',
-    data: { productNo: productNo, "memberNo": loginMemberNo },
-    success: (result) => {
-      wishBtn.classList.remove('wish-clicked');
-      wishBtn.classList.add('wish-unclicked');
+  axios.delete('/wishes/' + loginMemberNo + "/" + productNo)
+  .then((result) => {
+    wishBtn.classList.remove('wish-clicked');
+    wishBtn.classList.add('wish-unclicked');
 
-      messageModalOpen("찜 목록에서 제거되었습니다.");
-    },
-    error: () => {
-      console.log('찜 취소 중 오류 발생');
-    },
+    messageModalOpen("찜 목록에서 제거되었습니다.");
+  }).catch((err) => {
+    console.log('찜 취소 중 오류 발생');
   });
 };
 
@@ -155,12 +147,9 @@ if (document.getElementById('orderBtn') != undefined) {
         const amount = document.getElementById('productAmount').innerText;
         
         // 상품 실 재고 확인 후 주문 수량 이상일 때만 주문 가능하게
-        $.ajax({
-          url: "/product/stock",
-          data: { "productNo": getProductNo() },
-          success: (stock) => {
-
-            console.log("현재 상품 재고 수량: " + stock);
+        axios.get('/products/' + getProductNo() + '/stock' )
+        .then((result) => {
+          console.log("현재 상품 재고 수량: " + stock);
             // !실재고 수량이 0보다 크고 선택된 수량보다 같거나 클때만 주문서로 이동
             if (stock >= amount && stock != 0) {
               const form = document.getElementById('orderPage');
@@ -170,8 +159,10 @@ if (document.getElementById('orderBtn') != undefined) {
             } else {
               messageModalOpen("선택된 수량이 상품의 재고 수량보다 많습니다.");
             }
-          }
-        })
+        }).catch((err) => {
+          console.log(err);
+        });
+
 
       } else if(authority ==1) {
         alert('일반 회원 계정으로 로그인해주세요');
@@ -336,7 +327,7 @@ const selectImgReview = () => {
   const productNo = getProductNo();
 
   $.ajax({
-    url: "/select/reviewImgList",
+    url: "/reviews/images",
     data: { "productNo": productNo },
     dataType: "json",
     success: (reviewList) => {
@@ -436,7 +427,7 @@ const selectReview = (reviewNo, loginMemberNo) => {
   }
 
   $.ajax({
-    url: '/select/review/' + reviewNo,
+    url: '/reviews/' + reviewNo,
     data: { "memberNo": loginMemberNo },
     dataType: 'json',
     success: (review) => {
@@ -724,7 +715,8 @@ const helpedClick = (helpedBtn, reviewNo) => {
 const addHelp = (reviewNo, helpedBtn) => {
 
   $.ajax({
-    url: '/help/add',
+    url: '/helps',
+    type: 'post',
     data: { "reviewNo": reviewNo },
     success: (result) => {
       if (result > 0) {
@@ -744,7 +736,8 @@ const addHelp = (reviewNo, helpedBtn) => {
 const removeHelp = (reviewNo, helpedBtn) => {
 
   $.ajax({
-    url: '/help/remove',
+    url: '/helps',
+    type: 'delete',
     data: { "reviewNo": reviewNo },
     success: (result) => {
       if (result > 0) {
@@ -792,7 +785,7 @@ if (reviewNext != undefined) {
 /* cp를 전달받아 리뷰를 조회하는 Function */
 const selectReviewList = (productNo, cp) => {
   $.ajax({
-    url: '/select/review',
+    url: '/reviews',
     data: { "productNo": productNo, "cp": cp, "sortFl": sortFl },
     dataType: 'json',
     success: (map) => {
@@ -1065,7 +1058,7 @@ document.getElementById('sortNewest').addEventListener('click', (e) => {
 /* sortFl을 전달받아 리뷰를 조회하는 Function */
 const selectReviewListBySort = (productNo, sortFL) => {
   $.ajax({
-    url: '/select/review',
+    url: '/reviews',
     data: { "productNo": productNo, "sortFl": sortFL },
     dataType: 'json',
     success: (map) => {
@@ -1141,7 +1134,7 @@ const selectReviewUpdate = (reviewNo) => {
   console.log(reviewNo);
 
   $.ajax({
-    url: '/select/review/' + reviewNo,
+    url: '/reviews/' + reviewNo,
     data: { "memberNo": loginMemberNo },
     dataType: 'json',
     success: (review) => {
@@ -1179,7 +1172,7 @@ const fillReviewForm = (review) => {
   modalProductThumbnail.src = review.productThumbnail;
   
   modalProductName.removeAttribute('href');
-  modalProductName.href = '/product/' + review.productNo;
+  modalProductName.href = '/products/' + review.productNo;
   modalProductName.innerHTML = review.productName;
   
   
@@ -1226,6 +1219,8 @@ const deleteSet = new Set();
 
 for (let i = 0; i < inputFile.length; i++) {
   inputFile[i].addEventListener('change', (e) => {
+    console.log("파일 변경 감지");
+
     const file = inputFile[i].files[0];
 
     if (file) {
@@ -1235,12 +1230,11 @@ for (let i = 0; i < inputFile.length; i++) {
 
       reader.onload = (e) => {
 
-        reviewImage[i].setAttribute('src', event.target.result);
+        reviewImage[i].setAttribute('src', e.target.result);
         displayFlexNoLock(reviewImage[i]);
         inputLabel[i].style.display = 'none';
         displayFlexNoLock(xBtn[i]);
 
-        deleteSet.delete(i);
 
       };
     } else {
@@ -1252,6 +1246,8 @@ for (let i = 0; i < inputFile.length; i++) {
       xBtn[i].classList.add('hide');
       xBtn[i].classList.remove('appear');
 
+      deleteSet.add(i);
+      console.log(i + "번 이미지 delete set 추가!");
     }
   });
 
@@ -1269,6 +1265,7 @@ for (let i = 0; i < inputFile.length; i++) {
       inputFile[i].value = '';
 
       deleteSet.add(i);
+      console.log(i + "번 이미지 delete set 추가!");
     }
 
   })
@@ -1294,7 +1291,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     const formData = new FormData(form);
 
     $.ajax({
-      url: "/review/update",
+      url: "/reviews/" + formData.reviewNo,
       data: formData,
       type: "POST",
       contentType: false,
